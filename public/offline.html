@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Threefold Cord — Offline</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      background: #0F1E2E;
+      color: #E8E3D9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 2rem;
+      text-align: center;
+    }
+    .container { max-width: 400px; }
+    .icon { font-size: 3rem; margin-bottom: 1.5rem; opacity: 0.8; }
+    h1 {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.75rem;
+      font-weight: 500;
+      margin-bottom: 0.75rem;
+      color: #D4B45A;
+    }
+    p { font-size: 0.9rem; line-height: 1.6; color: #8A9BAA; margin-bottom: 1.5rem; }
+    .verse {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-style: italic;
+      font-size: 1rem;
+      color: #A69D90;
+      border-top: 1px solid #1A2D40;
+      padding-top: 1.5rem;
+      margin-top: 1.5rem;
+    }
+    .ref { font-size: 0.75rem; color: #70695E; margin-top: 0.5rem; text-transform: uppercase; letter-spacing: 0.1em; }
+    button {
+      background: linear-gradient(135deg, #B8860B, #8B6914);
+      color: white;
+      border: none;
+      padding: 0.75rem 2rem;
+      border-radius: 0.75rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="icon">🕊️</div>
+    <h1>You're Offline</h1>
+    <p>It looks like you've lost your connection. Don't worry — your progress is saved, and we'll be here when you're back online.</p>
+    <button onclick="window.location.reload()">Try Again</button>
+    <div class="verse">
+      "A cord of three strands is not quickly broken."
+      <div class="ref">Ecclesiastes 4:12</div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,203 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ═══════════════════════════════════════════════
+   LIGHT MODE (default)
+   ═══════════════════════════════════════════════ */
+:root {
+  /* ─── Brand Palette ─── */
+  --navy: #0F1E2E;
+  --navy-mid: #1A2D40;
+  --navy-light: #243A50;
+  --gold: #C7A23A;
+  --gold-light: #D4B45A;
+  --gold-dark: #A8862E;
+  --gold-soft: #F5ECD7;
+  --ivory: #F4F1EA;
+  --ivory-dark: #E8E3D9;
+  --burgundy: #6B2C3E;
+  --white: #FFFFFF;
+
+  /* ─── Semantic Tokens (Light) ─── */
+  --bg-primary: #FAF8F4;
+  --bg-card: #FFFFFF;
+  --bg-card-hover: #FFFDF8;
+  --bg-accent: #F5ECD7;
+  --bg-hero: #0F1E2E;
+  --bg-input: #F4F1EA;
+  --bg-warm: #FAF8F4;
+  --bg-overlay: rgba(44, 36, 24, 0.5);
+
+  --text-primary: #2C2418;
+  --text-secondary: #7A7062;
+  --text-muted: #A69D90;
+  --text-light: #C8C0B4;
+  --text-inverse: #F4F1EA;
+  --text-link: #B8860B;
+
+  --border: #E8E2D8;
+  --border-light: #EDE9E2;
+  --border-focus: #C7A23A;
+
+  --shadow-card: 0 2px 12px rgba(44, 36, 24, 0.04);
+  --shadow-card-lg: 0 8px 40px rgba(15, 30, 46, 0.06);
+
+  /* ─── Pillar Colors ─── */
+  --pillar-covenant-bg: #F5ECD7;
+  --pillar-covenant-text: #8B6914;
+  --pillar-safety-bg: #EDE7F6;
+  --pillar-safety-text: #5E35B1;
+  --pillar-comm-bg: #E3F2FD;
+  --pillar-comm-text: #1565C0;
+  --pillar-spiritual-bg: #F0F7EC;
+  --pillar-spiritual-text: #33691E;
+
+  /* ─── Status Colors ─── */
+  --green: #5B8A3C;
+  --green-bg: #F0F7EC;
+  --red: #C44536;
+  --red-bg: #FDF2F2;
+  --gold-bg: #F5ECD7;
+
+  /* ─── Navigation ─── */
+  --bg-nav: rgba(255, 255, 255, 0.92);
+  --border-nav: rgba(232, 226, 216, 0.6);
+  --nav-active-bg: rgba(245, 236, 215, 0.6);
+}
+
+/* ═══════════════════════════════════════════════
+   DARK MODE
+   ═══════════════════════════════════════════════ */
+.dark {
+  /* ─── Backgrounds (warmer, more contrast between layers) ─── */
+  --bg-primary: #111A24;
+  --bg-card: #182230;
+  --bg-card-hover: #1E2C3C;
+  --bg-accent: #22303F;
+  --bg-hero: #0A1018;
+  --bg-input: #1C2936;
+  --bg-warm: #151F2B;
+  --bg-overlay: rgba(0, 0, 0, 0.65);
+
+  /* ─── Text (brighter, better contrast) ─── */
+  --text-primary: #F0ECE4;
+  --text-secondary: #BDB5A8;
+  --text-muted: #8A8278;
+  --text-light: #5C564E;
+  --text-inverse: #0F1E2E;
+  --text-link: #E0C45E;
+
+  /* ─── Borders (visible but subtle) ─── */
+  --border: #283848;
+  --border-light: #2E3E50;
+  --border-focus: #D4B45A;
+
+  /* ─── Shadows (deeper) ─── */
+  --shadow-card: 0 2px 12px rgba(0, 0, 0, 0.3);
+  --shadow-card-lg: 0 8px 40px rgba(0, 0, 0, 0.4);
+
+  /* ─── Pillar Colors (richer, more visible) ─── */
+  --pillar-covenant-bg: #2C2414;
+  --pillar-covenant-text: #E0C45E;
+  --pillar-safety-bg: #221838;
+  --pillar-safety-text: #C4B0E8;
+  --pillar-comm-bg: #122238;
+  --pillar-comm-text: #7CC4FA;
+  --pillar-spiritual-bg: #182614;
+  --pillar-spiritual-text: #8FD48F;
+
+  /* ─── Status Colors (bright enough to read) ─── */
+  --green: #7CC45A;
+  --green-bg: #182614;
+  --red: #F08070;
+  --red-bg: #301818;
+  --gold-bg: #2C2414;
+
+  /* ─── Navigation ─── */
+  --bg-nav: rgba(17, 26, 36, 0.95);
+  --border-nav: rgba(40, 56, 72, 0.7);
+  --nav-active-bg: rgba(50, 40, 18, 0.5);
+}
+
+/* ═══════════════════════════════════════════════
+   BASE STYLES
+   ═══════════════════════════════════════════════ */
+body {
+  font-family: 'DM Sans', 'Source Sans 3', sans-serif;
+  color: var(--text-primary);
+  background: var(--bg-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Card & surface transitions */
+.dark * {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-primary); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+/* Focus styles */
+*:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+/* Smooth transitions for interactive elements */
+a, button, input, textarea, select, [role="button"] {
+  transition-property: color, background-color, border-color, box-shadow, transform, opacity;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+/* Card hover transitions */
+.shadow-card {
+  box-shadow: var(--shadow-card);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* ═══════════════════════════════════════════════
+   UTILITY CLASSES (theme-aware)
+   ═══════════════════════════════════════════════ */
+.bg-surface { background: var(--bg-primary); }
+.bg-card { background: var(--bg-card); }
+.bg-card-hover { background: var(--bg-card-hover); }
+.bg-accent { background: var(--bg-accent); }
+.bg-input { background: var(--bg-input); }
+.bg-warm { background: var(--bg-warm); }
+
+.text-base-primary { color: var(--text-primary); }
+.text-base-secondary { color: var(--text-secondary); }
+.text-base-muted { color: var(--text-muted); }
+.text-base-light { color: var(--text-light); }
+.text-base-link { color: var(--text-link); }
+
+.border-themed { border-color: var(--border); }
+.border-themed-light { border-color: var(--border-light); }
+
+/* Fade-in animation */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fadeIn {
+  animation: fadeIn 0.8s ease-out;
+}
+
+/* Slide-up animation (install prompt) */
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-slideUp {
+  animation: slideUp 0.4s ease-out;
+}
+
+/* Dark mode image adjustments */
+.dark img:not([data-no-dim]) {
+  filter: brightness(0.92);
+}
