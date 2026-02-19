@@ -6,7 +6,6 @@ import { createClient } from '@/lib/supabase-browser';
 import { ThreefoldLogo } from '@/components/ui/Logo';
 import { TopBar } from '@/components/ui/TopBar';
 import { t } from '@/lib/tokens';
-import Link from 'next/link';
 
 const PHASE_CONFIG = [
   { number: 1, icon: '⚓', color: t.pillarSafetyText, bg: t.pillarSafetyBg, label: 'Stabilise' },

@@ -78,13 +78,21 @@ export default function OnboardingPage() {
 
         // Send spouse invitation if provided
         if (data.spouseEmail) {
-          await supabase.from('spouse_invitations').insert({
+          const { data: invite } = await supabase.from('spouse_invitations').insert({
             inviter_id: user.id,
+            inviter_name: data.firstName || null,
             couple_id: couple.id,
             invitee_email: data.spouseEmail,
             invitee_name: data.spouseName || null,
             personal_message: data.spouseMessage || null,
-          });
+          }).select('id').single();
+
+          // Trigger invitation email
+          if (invite) {
+            supabase.functions.invoke('send-spouse-invite', {
+              body: { invitation_id: invite.id },
+            }).catch(err => console.log('Invite email note:', err));
+          }
         }
       }
 

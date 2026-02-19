@@ -19,6 +19,7 @@ interface Profile {
   couple_id: string | null;
   partner_id: string | null;
   onboarding_completed: boolean;
+  current_devotional_day: number;
 }
 
 interface PartnerInfo {
@@ -54,6 +55,7 @@ interface Assessment {
 
 interface Devotional {
   id: string;
+  day_number: number;
   title: string;
   pillar: string;
   scripture_reference: string;
@@ -102,6 +104,7 @@ export default function DashboardPage() {
   const [invitation, setInvitation] = useState<SpouseInvitation | null>(null);
   const [devotionalCount, setDevotionalCount] = useState(0);
   const [isAmbassador, setIsAmbassador] = useState(false);
+  const [weeklyCheckInDone, setWeeklyCheckInDone] = useState(true);
   const [loading, setLoading] = useState(true);
   const [visible, setVisible] = useState(false);
 
@@ -141,10 +144,30 @@ export default function DashboardPage() {
       setDevotionalCount(count || 0);
       const { data: amb } = await supabase.from('church_ambassadors').select('id').eq('profile_id', user.id).limit(1).maybeSingle();
       setIsAmbassador(!!amb);
+
+      // Check weekly check-in status for linked couples
+      if (prof.couple_id && prof.partner_id) {
+        const now = new Date();
+        const day = now.getDay();
+        const diff = now.getDate() - day + (day === 0 ? -6 : 1);
+        const monday = new Date(new Date(now).setDate(diff)).toISOString().split('T')[0];
+        const { data: ci } = await supabase
+          .from('couple_check_ins')
+          .select('spouse_1_submitted_at, spouse_2_submitted_at')
+          .eq('couple_id', prof.couple_id)
+          .eq('week_of', monday)
+          .maybeSingle();
+        // Check if THIS user has submitted (they could be spouse_1 or spouse_2)
+        const coup = await supabase.from('couples').select('spouse_1_id').eq('id', prof.couple_id).single();
+        const isSpouse1 = coup.data?.spouse_1_id === user.id;
+        const mySubmitted = ci ? (isSpouse1 ? ci.spouse_1_submitted_at : ci.spouse_2_submitted_at) : null;
+        setWeeklyCheckInDone(!!mySubmitted);
+      }
     }
 
-    const today = new Date().toISOString().split('T')[0];
-    const { data: dev } = await supabase.from('devotionals').select('*').eq('publish_date', today).eq('is_active', true).maybeSingle();
+    // Load user's current devotional by day_number (sequence-based, not date-based)
+    const userDay = prof?.current_devotional_day || 1;
+    const { data: dev } = await supabase.from('devotionals').select('id, title, pillar, scripture_reference, day_number').eq('day_number', userDay).eq('is_active', true).maybeSingle();
     if (dev) {
       setTodayDevotional(dev);
       const { data: comp } = await supabase.from('devotional_completions').select('id').eq('profile_id', user.id).eq('devotional_id', dev.id).maybeSingle();
@@ -242,7 +265,23 @@ export default function DashboardPage() {
           )}
         </div>
 
-        {/* Spouse Status */}
+        {/* Invite Spouse nudge for solo users */}
+        {!partner && !invitation && (
+          <div className="rounded-2xl p-5 mb-4" style={{ background: t.bgCard, boxShadow: t.shadowCard, border: `1.5px dashed ${t.textLink}30` }}>
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 text-2xl" style={{ background: t.goldBg }}>💌</div>
+              <div className="flex-1">
+                <div className="text-sm font-semibold" style={{ fontFamily: 'Source Sans 3, sans-serif', color: t.textPrimary }}>Better together</div>
+                <div className="text-xs mt-0.5" style={{ color: t.textMuted }}>Invite your spouse to unlock shared tools, couple exercises, and the Together dashboard</div>
+              </div>
+              <Link href="/couple" className="no-underline">
+                <span className="text-xs px-3 py-1.5 rounded-full font-semibold whitespace-nowrap" style={{ background: t.goldBg, color: t.textLink }}>Invite →</span>
+              </Link>
+            </div>
+          </div>
+        )}
+
+        {/* Spouse invitation pending */}
         {!partner && invitation && (
           <div className="rounded-2xl p-5 mb-4" style={{ background: t.bgCard, boxShadow: t.shadowCard, border: `1px solid ${t.textLink}20` }}>
             <div className="flex items-center justify-between">
@@ -277,6 +316,22 @@ export default function DashboardPage() {
           </Link>
         )}
 
+        {/* Weekly Check-In prompt for linked couples */}
+        {partner && !weeklyCheckInDone && (
+          <Link href="/couple" className="block no-underline">
+            <div className="rounded-2xl p-5 mb-4 cursor-pointer transition-all hover:-translate-y-0.5" style={{ background: t.bgCard, boxShadow: t.shadowCard, border: `1.5px solid ${t.pillarCommText}25` }}>
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 text-2xl" style={{ background: t.pillarCommBg }}>📋</div>
+                <div className="flex-1">
+                  <div className="text-sm font-semibold" style={{ fontFamily: 'Source Sans 3, sans-serif', color: t.textPrimary }}>How was your week together?</div>
+                  <div className="text-xs mt-0.5" style={{ color: t.textMuted }}>2 minutes · Private until both submit · Reveals together</div>
+                </div>
+                <span className="text-xs px-3 py-1.5 rounded-full font-semibold whitespace-nowrap" style={{ background: t.pillarCommBg, color: t.pillarCommText }}>Check in →</span>
+              </div>
+            </div>
+          </Link>
+        )}
+
         {/* Today's Devotional */}
         <Link href="/devotional" className="block no-underline">
           <div className="rounded-2xl p-5 mb-4 cursor-pointer transition-all hover:-translate-y-0.5" style={{ background: t.bgCard, boxShadow: t.shadowCard }}>
@@ -290,8 +345,8 @@ export default function DashboardPage() {
                   )}
                 </div>
                 <div>
-                  <div className="text-xs font-semibold uppercase tracking-wider mb-1" style={{ color: t.textSecondary, fontFamily: 'Source Sans 3, sans-serif' }}>Today&apos;s Covenant Moment</div>
-                  <div className="text-base font-medium" style={{ fontFamily: 'Cormorant Garamond, serif', color: t.textPrimary }}>{todayDevotional?.title || 'No devotional today'}</div>
+                  <div className="text-xs font-semibold uppercase tracking-wider mb-1" style={{ color: t.textSecondary, fontFamily: 'Source Sans 3, sans-serif' }}>{todayDevotional ? `Day ${todayDevotional.day_number} · Covenant Moment` : 'Daily Covenant Moment'}</div>
+                  <div className="text-base font-medium" style={{ fontFamily: 'Cormorant Garamond, serif', color: t.textPrimary }}>{todayDevotional?.title || 'Start your devotional journey'}</div>
                   {todayDevotional && (
                     <div className="text-xs mt-1" style={{ color: t.textMuted, fontFamily: 'Source Sans 3, sans-serif' }}>{todayDevotional.scripture_reference}</div>
                   )}
@@ -304,6 +359,20 @@ export default function DashboardPage() {
                   <span className="text-xs px-3 py-1.5 rounded-full font-semibold" style={{ background: t.goldBg, color: t.textLink }}>Read →</span>
                 ) : null}
               </div>
+            </div>
+          </div>
+        </Link>
+
+        {/* Challenges */}
+        <Link href="/challenges" className="block no-underline">
+          <div className="rounded-2xl p-5 mb-4 cursor-pointer transition-all hover:-translate-y-0.5" style={{ background: t.bgCard, boxShadow: t.shadowCard, border: `1.5px solid ${t.textLink}30` }}>
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 text-2xl" style={{ background: t.goldBg }}>💪</div>
+              <div className="flex-1">
+                <div className="text-sm font-semibold" style={{ fontFamily: 'Source Sans 3, sans-serif', color: t.textPrimary }}>7-Day Challenges</div>
+                <div className="text-xs mt-0.5" style={{ color: t.textMuted }}>4 challenges · Reconnect · Communication · Prayer · Gratitude</div>
+              </div>
+              <span className="text-xs px-3 py-1.5 rounded-full font-semibold" style={{ background: t.goldBg, color: t.textLink }}>Explore →</span>
             </div>
           </div>
         </Link>
@@ -396,7 +465,7 @@ export default function DashboardPage() {
             { href: '/journal', emoji: '📔', label: 'Our Journal', sub: 'Shared diary' },
             { href: '/couple', emoji: '💑', label: 'Couple', sub: 'Partnership' },
             { href: '/assessment', emoji: '📋', label: 'Assessment', sub: 'Check your pillars' },
-            { href: '/roadmap', emoji: '🗺️', label: 'Roadmap', sub: "What's coming" },
+            { href: '/journey', emoji: '📊', label: 'My Journey', sub: 'Stats & progress' },
           ].map(item => (
             <Link key={item.href} href={item.href} className="no-underline">
               <div className="rounded-2xl p-4 text-center cursor-pointer transition-all hover:-translate-y-0.5" style={{ background: t.bgCard, boxShadow: t.shadowCard }}>
