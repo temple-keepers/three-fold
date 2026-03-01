@@ -77,7 +77,14 @@ function AuthContent() {
         setTimeout(() => { window.location.href = '/dashboard'; }, 2000);
       }
     } catch (err: any) {
-      setError(err.message || 'Something went wrong');
+      const msg = err.message || 'Something went wrong';
+      if (msg.toLowerCase().includes('leaked') || msg.toLowerCase().includes('pwned') || msg.toLowerCase().includes('breached') || msg.toLowerCase().includes('compromised')) {
+        setError('This password has appeared in a known data breach. Please choose a different, more secure password.');
+      } else if (msg.toLowerCase().includes('weak')) {
+        setError('This password is too weak. Please use at least 8 characters with a mix of letters and numbers.');
+      } else {
+        setError(msg);
+      }
     } finally {
       setLoading(false);
     }
@@ -185,6 +192,25 @@ function AuthContent() {
                   style={{ background: t.bgInput, borderColor: t.border, color: t.textPrimary, fontFamily: 'DM Sans, sans-serif' }}
                   minLength={8}
                 />
+                {/* Password requirements — show on signup & update-password */}
+                {(mode === 'signup' || mode === 'update-password') && (
+                  <div className="mt-2 flex flex-col gap-1">
+                    <div className="flex items-center gap-1.5">
+                      <span style={{ color: password.length >= 8 ? t.green : t.textMuted, fontSize: 14, lineHeight: 1 }}>
+                        {password.length >= 8 ? '✓' : '○'}
+                      </span>
+                      <span className="text-xs" style={{ color: password.length >= 8 ? t.green : t.textMuted, fontFamily: 'DM Sans, sans-serif' }}>
+                        At least 8 characters
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <span style={{ color: t.textMuted, fontSize: 14, lineHeight: 1 }}>🛡</span>
+                      <span className="text-xs" style={{ color: t.textMuted, fontFamily: 'DM Sans, sans-serif' }}>
+                        Checked against known data breaches
+                      </span>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
