@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase-browser';
-import { ThreefoldLogo } from '@/components/ui/Logo';
+import { CleaveLogo } from '@/components/ui/Logo';
 import { TopBar } from '@/components/ui/TopBar';
 import { ShareMilestone } from '@/components/ui/ShareMilestone';
 import { t } from '@/lib/tokens';
@@ -252,7 +252,7 @@ export default function DevotionalPage() {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: t.bgPrimary }}>
         <div className="text-center">
-          <ThreefoldLogo size={48} />
+          <CleaveLogo size={48} />
           <p className="mt-4 text-sm" style={{ color: t.textMuted, fontFamily: 'Source Sans 3, sans-serif' }}>
             Loading your devotional...
           </p>

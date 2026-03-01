@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase-browser';
-import { ThreefoldLogo } from '@/components/ui/Logo';
+import { CleaveLogo } from '@/components/ui/Logo';
 import { TopBar } from '@/components/ui/TopBar';
 import { t } from '@/lib/tokens';
 import { useSubscription } from '@/lib/useSubscription';
@@ -129,7 +129,7 @@ export default function ResetPage() {
   if (loading || subLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: t.bgPrimary }}>
-        <ThreefoldLogo size={48} />
+        <CleaveLogo size={48} />
       </div>
     );
   }
@@ -161,7 +161,7 @@ export default function ResetPage() {
         {/* Enrol CTA if not enrolled */}
         {!enrolment && (
           <div className="rounded-3xl p-8 text-center mb-6" style={{ background: t.bgCard, boxShadow: t.shadowCard }}>
-            <ThreefoldLogo size={56} />
+            <CleaveLogo size={56} />
             <h2 className="text-2xl font-medium mt-4 mb-2" style={{ fontFamily: 'Cormorant Garamond, serif', color: t.textPrimary }}>
               Begin Your 60-Day Reset
             </h2>

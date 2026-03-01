@@ -1,6 +1,6 @@
 /// <reference lib="webworker" />
 
-const CACHE_NAME = 'threefold-v1';
+const CACHE_NAME = 'cleave-v1';
 const OFFLINE_URL = '/offline';
 
 // Assets to pre-cache on install
@@ -114,7 +114,7 @@ self.addEventListener('push', (event) => {
     icon: '/pwa/icon-192x192.png',
     badge: '/pwa/icon-96x96.png',
     vibrate: [100, 50, 100],
-    tag: data.tag || 'threefold-notification',
+    tag: data.tag || 'cleave-notification',
     renotify: true,
     data: { url: data.url || '/dashboard' },
     actions: data.actions || [],

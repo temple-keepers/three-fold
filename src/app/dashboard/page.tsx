@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase-browser';
-import { ThreefoldLogo } from '@/components/ui/Logo';
+import { CleaveLogo } from '@/components/ui/Logo';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { DashboardSkeleton } from '@/components/ui/Skeleton';
 import { t } from '@/lib/tokens';
@@ -126,7 +126,7 @@ export default function DashboardPage() {
         {/* ─── HEADER ─── */}
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-3">
-            <ThreefoldLogo size={28} />
+            <CleaveLogo size={28} />
             <div>
               <h1 className="text-lg font-medium m-0" style={{ fontFamily:'Cormorant Garamond,serif', color:t.textPrimary }}>
                 {greeting}, {profile?.first_name || 'Friend'}

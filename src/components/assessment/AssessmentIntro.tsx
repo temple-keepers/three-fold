@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { ThreefoldLogo } from '@/components/ui/Logo';
+import { CleaveLogo } from '@/components/ui/Logo';
 import { t } from '@/lib/tokens';
 
 interface Props {
@@ -28,7 +28,7 @@ export function AssessmentIntro({ onStart }: Props) {
       style={{ opacity: visible ? 1 : 0, transform: visible ? 'translateY(0)' : 'translateY(16px)' }}
     >
       <div className="text-center mb-8">
-        <ThreefoldLogo size={56} />
+        <CleaveLogo size={56} />
         <h1
           className="text-3xl font-medium mt-4 mb-2"
           style={{ fontFamily: 'Cormorant Garamond, serif', color: t.textPrimary, lineHeight: 1.2 }}

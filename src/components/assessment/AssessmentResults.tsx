@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { ThreefoldLogo } from '@/components/ui/Logo';
+import { CleaveLogo } from '@/components/ui/Logo';
 import { t } from '@/lib/tokens';
 
 interface Results {
@@ -114,7 +114,7 @@ export function AssessmentResults({ results, onContinue }: Props) {
       style={{ opacity: visible ? 1 : 0, transform: visible ? 'translateY(0)' : 'translateY(16px)' }}
     >
       <div className="text-center mb-6">
-        <ThreefoldLogo size={48} />
+        <CleaveLogo size={48} />
         <h2 className="text-3xl font-medium mt-3 mb-1" style={{ fontFamily: 'Cormorant Garamond, serif', color: t.textPrimary }}>
           Your Results
         </h2>

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase-browser';
-import { ThreefoldLogo } from '@/components/ui/Logo';
+import { CleaveLogo } from '@/components/ui/Logo';
 import { TopBar } from '@/components/ui/TopBar';
 import { t } from '@/lib/tokens';
 import Link from 'next/link';
@@ -326,7 +326,7 @@ export default function DailyTogetherPage() {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: t.bgPrimary }}>
         <div className="text-center">
-          <ThreefoldLogo size={48} />
+          <CleaveLogo size={48} />
           <p className="mt-4 text-sm" style={{ color: t.textMuted, fontFamily: 'Source Sans 3, sans-serif' }}>
             Loading your daily question...
           </p>

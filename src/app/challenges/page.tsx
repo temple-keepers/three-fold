@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase-browser';
-import { ThreefoldLogo } from '@/components/ui/Logo';
+import { CleaveLogo } from '@/components/ui/Logo';
 import { TopBar } from '@/components/ui/TopBar';
 import { t } from '@/lib/tokens';
 
@@ -152,7 +152,7 @@ export default function ChallengesPage() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: t.bgPrimary }}>
-        <ThreefoldLogo size={48} />
+        <CleaveLogo size={48} />
       </div>
     );
   }

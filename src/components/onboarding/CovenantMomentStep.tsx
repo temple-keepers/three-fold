@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import type { OnboardingData } from '@/app/onboarding/page';
-import { ThreefoldLogo } from '@/components/ui/Logo';
+import { CleaveLogo } from '@/components/ui/Logo';
 import { t } from '@/lib/tokens';
 
 interface Props {
@@ -31,7 +31,7 @@ export function CovenantMomentStep({ data, onComplete, saving }: Props) {
       style={{ opacity: revealed ? 1 : 0 }}
     >
       <div className="mb-5">
-        <ThreefoldLogo size={56} />
+        <CleaveLogo size={56} />
       </div>
 
       <h2

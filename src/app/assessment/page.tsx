@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase-browser';
-import { ThreefoldLogo } from '@/components/ui/Logo';
+import { CleaveLogo } from '@/components/ui/Logo';
 import { AssessmentIntro } from '@/components/assessment/AssessmentIntro';
 import { PillarSection } from '@/components/assessment/PillarSection';
 import { AssessmentResults } from '@/components/assessment/AssessmentResults';
@@ -168,7 +168,7 @@ export default function AssessmentPage() {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--bg-primary)' }}>
         <div className="text-center">
-          <ThreefoldLogo size={48} />
+          <CleaveLogo size={48} />
           <p className="mt-4 text-sm" style={{ color: 'var(--text-muted)', fontFamily: 'Source Sans 3, sans-serif' }}>
             Preparing your assessment...
           </p>
@@ -185,7 +185,7 @@ export default function AssessmentPage() {
           <div className="mb-4">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
-                <ThreefoldLogo size={24} />
+                <CleaveLogo size={24} />
                 <span className="text-sm" style={{ fontFamily: 'Cormorant Garamond, serif', color: 'var(--text-muted)' }}>
                   Covenant Assessment
                 </span>

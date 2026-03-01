@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { ThreefoldLogo } from '@/components/ui/Logo';
+import { CleaveLogo } from '@/components/ui/Logo';
 
 /* ═══════════════════════════════════════════════════════════════
    LANDING PAGE — Cleave
@@ -67,7 +67,7 @@ export default function LandingPage() {
         {/* Nav bar */}
         <nav className="relative z-10 flex items-center justify-between max-w-6xl mx-auto px-6 py-5">
           <div className="flex items-center gap-3">
-            <ThreefoldLogo size={36} />
+            <CleaveLogo size={36} />
             <span className="text-sm font-semibold tracking-[0.15em] uppercase hidden sm:inline" style={{ fontFamily: 'Cinzel, serif', color: C.ivory }}>
               Cleave
             </span>
@@ -85,7 +85,7 @@ export default function LandingPage() {
         {/* Hero content */}
         <div className="relative z-10 flex flex-col items-center justify-center text-center px-6 pt-16 pb-28 md:pt-24 md:pb-36">
           <div className="mb-8" style={{ filter: 'drop-shadow(0 4px 30px rgba(199,162,58,0.2))' }}>
-            <ThreefoldLogo size={100} />
+            <CleaveLogo size={100} />
           </div>
 
           <h1 className="text-4xl md:text-6xl font-bold tracking-[0.12em] uppercase max-w-4xl" style={{ fontFamily: 'Cinzel, serif', color: C.ivory, lineHeight: 1.1 }}>
@@ -433,7 +433,7 @@ export default function LandingPage() {
       <section className="py-20 md:py-28 px-6 relative overflow-hidden" style={{ background: C.navy }}>
         <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at 50% 50%, rgba(199,162,58,0.06) 0%, transparent 60%)' }} />
         <div className="relative z-10 max-w-2xl mx-auto text-center">
-          <ThreefoldLogo size={56} />
+          <CleaveLogo size={56} />
           <h2 className="text-3xl md:text-4xl font-medium mt-6 mb-4" style={{ fontFamily: 'Cormorant Garamond, serif', color: C.ivory, lineHeight: 1.3 }}>
             Your marriage deserves more than surviving
           </h2>
@@ -455,7 +455,7 @@ export default function LandingPage() {
       <footer className="py-10 px-6 border-t" style={{ background: C.white, borderColor: C.ivoryDark }}>
         <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <ThreefoldLogo size={24} />
+            <CleaveLogo size={24} />
             <span className="text-xs font-semibold tracking-wider uppercase" style={{ fontFamily: 'Cinzel, serif', color: C.textMid }}>Cleave</span>
           </div>
           <div className="flex items-center gap-6">

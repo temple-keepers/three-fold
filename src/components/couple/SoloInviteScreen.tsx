@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase-browser';
-import { ThreefoldLogo } from '@/components/ui/Logo';
+import { CleaveLogo } from '@/components/ui/Logo';
 import { t } from '@/lib/tokens';
 import Link from 'next/link';
 
@@ -167,7 +167,7 @@ export function SoloInviteScreen({ profile, couple }: { profile: any; couple: an
     <div className="min-h-screen px-4 py-6" style={{ background: t.bgPrimary }}>
       <div className="max-w-md mx-auto">
         <div className="flex items-center gap-3 mb-6">
-          <Link href="/dashboard"><ThreefoldLogo size={28} /></Link>
+          <Link href="/dashboard"><CleaveLogo size={28} /></Link>
           <div>
             <h1 className="text-xl font-medium m-0" style={{ fontFamily: 'Cormorant Garamond, serif', color: t.textPrimary }}>
               Couple Space

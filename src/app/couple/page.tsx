@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase-browser';
-import { ThreefoldLogo } from '@/components/ui/Logo';
+import { CleaveLogo } from '@/components/ui/Logo';
 import { t } from '@/lib/tokens';
 import Link from 'next/link';
 
@@ -181,7 +181,7 @@ export default function CoupleDashboard() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: t.bgPrimary }}>
-        <ThreefoldLogo size={48} />
+        <CleaveLogo size={48} />
       </div>
     );
   }
@@ -196,7 +196,7 @@ export default function CoupleDashboard() {
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
-            <Link href="/dashboard"><ThreefoldLogo size={28} /></Link>
+            <Link href="/dashboard"><CleaveLogo size={28} /></Link>
             <div>
               <h1 className="text-xl font-medium m-0" style={{ fontFamily: 'Cormorant Garamond, serif', color: t.textPrimary }}>
                 {profile?.first_name} & {partner?.first_name}

@@ -26,7 +26,7 @@ export function InstallPrompt() {
     if (standalone) return;
 
     // Was it dismissed before?
-    const wasDismissed = localStorage.getItem('tc-install-dismissed');
+    const wasDismissed = localStorage.getItem('cleave-install-dismissed');
     setDismissed(!!wasDismissed);
 
     // iOS detection (no beforeinstallprompt)
@@ -55,7 +55,7 @@ export function InstallPrompt() {
 
   function handleDismiss() {
     setDismissed(true);
-    localStorage.setItem('tc-install-dismissed', 'true');
+    localStorage.setItem('cleave-install-dismissed', 'true');
   }
 
   // Don't show if already installed or dismissed

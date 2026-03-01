@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase-browser';
-import { ThreefoldLogo } from '@/components/ui/Logo';
+import { CleaveLogo } from '@/components/ui/Logo';
 import { TopBar } from '@/components/ui/TopBar';
 import { t } from '@/lib/tokens';
 import Link from 'next/link';
@@ -141,7 +141,7 @@ function RegistrationScreen({ profile, onRegistered }: { profile: any; onRegiste
 
         {/* Hero */}
         <div className="text-center pt-6 pb-4">
-          <ThreefoldLogo size={56} />
+          <CleaveLogo size={56} />
           <h1
             className="text-2xl font-medium mt-4 mb-2"
             style={{ fontFamily: 'Cormorant Garamond, serif', color: t.textPrimary }}
@@ -1604,7 +1604,7 @@ export default function ChurchPage() {
         className="min-h-screen flex items-center justify-center"
         style={{ background: t.bgPrimary }}
       >
-        <ThreefoldLogo size={48} />
+        <CleaveLogo size={48} />
       </div>
     );
   }

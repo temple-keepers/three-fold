@@ -1,6 +1,6 @@
 'use client';
 
-import { ThreefoldLogo } from '@/components/ui/Logo';
+import { CleaveLogo } from '@/components/ui/Logo';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import Link from 'next/link';
 
@@ -25,7 +25,7 @@ export function PageShell({ children, title, subtitle, backHref = '/dashboard', 
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            <Link href={backHref}><ThreefoldLogo size={28} /></Link>
+            <Link href={backHref}><CleaveLogo size={28} /></Link>
             <div>
               <h1 className="text-xl font-medium m-0" style={{ fontFamily: 'Cormorant Garamond, serif', color: 'var(--text-primary)' }}>
                 {title}

@@ -36,7 +36,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   const setTheme = useCallback((t: Theme) => {
     setThemeState(t);
-    localStorage.setItem('tc-theme', t);
+    localStorage.setItem('cleave-theme', t);
     applyTheme(t);
   }, [applyTheme]);
 
@@ -46,7 +46,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   }, [resolved, setTheme]);
 
   useEffect(() => {
-    const stored = localStorage.getItem('tc-theme') as Theme | null;
+    const stored = localStorage.getItem('cleave-theme') as Theme | null;
     const initial = stored || 'system';
     setThemeState(initial);
     applyTheme(initial);
@@ -54,7 +54,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     // Listen for system changes
     const mq = window.matchMedia('(prefers-color-scheme: dark)');
     const handler = () => {
-      if ((localStorage.getItem('tc-theme') || 'system') === 'system') {
+      if ((localStorage.getItem('cleave-theme') || 'system') === 'system') {
         applyTheme('system');
       }
     };

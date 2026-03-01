@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { ThreefoldLogo } from '@/components/ui/Logo';
+import { CleaveLogo } from '@/components/ui/Logo';
 import { t } from '@/lib/tokens';
 
 const PILLARS = [
@@ -39,7 +39,7 @@ export function WelcomeStep({ onNext }: { onNext: () => void }) {
     >
       {/* Logo + Brand */}
       <div className="mb-5">
-        <ThreefoldLogo size={72} />
+        <CleaveLogo size={72} />
       </div>
 
       <h1
