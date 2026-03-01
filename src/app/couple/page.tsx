@@ -4,306 +4,28 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase-browser';
 import { ThreefoldLogo } from '@/components/ui/Logo';
-import { TopBar } from '@/components/ui/TopBar';
 import { t } from '@/lib/tokens';
 import Link from 'next/link';
 
-const PILLAR_STYLES: Record<string, { bg: string; text: string; icon: string; label: string }> = {
-  covenant: { bg: t.pillarCovenantBg, text: t.pillarCovenantText, icon: '🤝', label: 'Covenant' },
-  emotional_safety: { bg: t.pillarSafetyBg, text: t.pillarSafetyText, icon: '🛡️', label: 'Emotional Safety' },
-  communication: { bg: t.pillarCommBg, text: t.pillarCommText, icon: '💬', label: 'Communication' },
-  spiritual: { bg: t.pillarSpiritualBg, text: t.pillarSpiritualText, icon: '✝️', label: 'Spiritual' },
-  fun: { bg: t.goldBg, text: t.textLink, icon: '🎉', label: 'Fun' },
-  general: { bg: t.bgPrimary, text: t.textSecondary, icon: '⭐', label: 'General' },
-};
-
-const DIFF_COLORS: Record<string, { bg: string; text: string }> = {
-  easy: { bg: t.greenBg, text: t.green },
-  medium: { bg: t.goldBg, text: t.textLink },
-  deep: { bg: t.pillarSafetyBg, text: t.pillarSafetyText },
-};
-
-const NOTE_TYPES: Record<string, { icon: string; label: string; bg: string }> = {
-  love: { icon: '❤️', label: 'Love', bg: t.redBg },
-  encouragement: { icon: '💪', label: 'Encouragement', bg: t.pillarCommBg },
-  gratitude: { icon: '🙏', label: 'Gratitude', bg: t.greenBg },
-  prayer: { icon: '✝️', label: 'Prayer', bg: t.pillarSafetyBg },
-  apology: { icon: '🕊️', label: 'Apology', bg: t.bgCardHover },
-  fun: { icon: '😄', label: 'Fun', bg: t.goldBg },
-};
+import { SoloInviteScreen } from '@/components/couple/SoloInviteScreen';
+import { OverviewTab } from '@/components/couple/OverviewTab';
+import { ExercisesTab } from '@/components/couple/ExercisesTab';
+import { CheckInTab } from '@/components/couple/CheckInTab';
+import { NotesTab } from '@/components/couple/NotesTab';
+import { GoalsTab } from '@/components/couple/GoalsTab';
+import { PremiumBadge } from '@/components/ui/PremiumGate';
+import { UpgradePrompt } from '@/components/ui/UpgradePrompt';
+import { useSubscription } from '@/lib/useSubscription';
 
 type Tab = 'overview' | 'exercises' | 'checkin' | 'notes' | 'goals';
 
-/* ═══════════ Solo user invite screen ═══════════ */
-function SoloInviteScreen({ profile, couple }: { profile: any; couple: any }) {
-  const [spouseEmail, setSpouseEmail] = useState('');
-  const [spouseName, setSpouseName] = useState('');
-  const [message, setMessage] = useState('');
-  const [sending, setSending] = useState(false);
-  const [sent, setSent] = useState(false);
-  const [pendingInvite, setPendingInvite] = useState<any>(null);
-  const [inviteLink, setInviteLink] = useState('');
-  const [copied, setCopied] = useState(false);
-  const supabase = createClient();
-
-  useEffect(() => {
-    if (profile?.id) checkPending();
-  }, [profile?.id]);
-
-  async function checkPending() {
-    const { data } = await supabase
-      .from('spouse_invitations')
-      .select('*')
-      .eq('inviter_id', profile.id)
-      .eq('status', 'pending')
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .maybeSingle();
-    if (data) {
-      setPendingInvite(data);
-      const baseUrl = window.location.origin;
-      setInviteLink(`${baseUrl}/invite/${data.invite_token}`);
-    }
-  }
-
-  async function sendInvite() {
-    if (!spouseEmail.trim() || !profile) return;
-    setSending(true);
-    try {
-      // Create couple if none exists
-      let coupleId = couple?.id;
-      if (!coupleId) {
-        const { data: newCouple } = await supabase.from('couples').insert({
-          spouse_1_id: profile.id,
-          status: 'pending',
-        }).select('id').single();
-        if (newCouple) {
-          coupleId = newCouple.id;
-          await supabase.from('profiles').update({ couple_id: coupleId }).eq('id', profile.id);
-        }
-      }
-
-      const { data: invite } = await supabase.from('spouse_invitations').insert({
-        inviter_id: profile.id,
-        inviter_name: profile.first_name || null,
-        couple_id: coupleId,
-        invitee_email: spouseEmail.trim(),
-        invitee_name: spouseName.trim() || null,
-        personal_message: message.trim() || null,
-      }).select('id, invite_token').single();
-
-      if (invite) {
-        supabase.functions.invoke('send-spouse-invite', {
-          body: { invitation_id: invite.id },
-        }).catch(() => {});
-
-        const baseUrl = window.location.origin;
-        setInviteLink(`${baseUrl}/invite/${invite.invite_token}`);
-        setSent(true);
-        setPendingInvite(invite);
-      }
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setSending(false);
-    }
-  }
-
-  async function copyLink() {
-    try {
-      await navigator.clipboard.writeText(inviteLink);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      // Fallback
-      const input = document.createElement('input');
-      input.value = inviteLink;
-      document.body.appendChild(input);
-      input.select();
-      document.execCommand('copy');
-      document.body.removeChild(input);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }
-  }
-
-  return (
-    <div className="min-h-screen px-4 py-6" style={{ background: t.bgPrimary }}>
-      <div className="max-w-md mx-auto">
-        <div className="flex items-center gap-3 mb-6">
-          <Link href="/dashboard"><ThreefoldLogo size={28} /></Link>
-          <div>
-            <h1 className="text-xl font-medium m-0" style={{ fontFamily: 'Cormorant Garamond, serif', color: t.textPrimary }}>
-              Couple Space
-            </h1>
-            <p className="text-xs m-0" style={{ color: t.textMuted }}>Invite your spouse to begin</p>
-          </div>
-        </div>
-
-        {/* If there's already a pending invite */}
-        {pendingInvite && !sent ? (
-          <div className="rounded-3xl p-8" style={{ background: t.bgCard, boxShadow: t.shadowCard }}>
-            <div className="text-center mb-6">
-              <span className="text-4xl block mb-3">💌</span>
-              <h2 className="text-xl font-medium m-0 mb-2" style={{ fontFamily: 'Cormorant Garamond, serif', color: t.textPrimary }}>
-                Invitation Sent
-              </h2>
-              <p className="text-sm m-0" style={{ color: t.textMuted, lineHeight: 1.6 }}>
-                Waiting for <strong>{pendingInvite.invitee_name || pendingInvite.invitee_email}</strong> to accept.
-                Share the link below if they didn&apos;t get the email.
-              </p>
-            </div>
-
-            <div className="rounded-xl p-4 mb-4 flex items-center gap-2" style={{ background: t.bgInput, border: `1px solid ${t.border}` }}>
-              <input
-                readOnly
-                value={inviteLink}
-                className="flex-1 text-xs bg-transparent border-none outline-none"
-                style={{ color: t.textSecondary, fontFamily: 'Source Sans 3, sans-serif' }}
-              />
-              <button
-                onClick={copyLink}
-                className="px-3 py-1.5 rounded-lg text-xs font-semibold border-none cursor-pointer flex-shrink-0"
-                style={{ background: copied ? t.greenBg : t.goldBg, color: copied ? t.green : t.textLink, fontFamily: 'Source Sans 3, sans-serif' }}
-              >
-                {copied ? 'Copied ✓' : 'Copy'}
-              </button>
-            </div>
-
-            <p className="text-xs text-center" style={{ color: t.textLight }}>
-              Expires {new Date(pendingInvite.expires_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long' })}
-            </p>
-          </div>
-        ) : sent ? (
-          <div className="rounded-3xl p-8 text-center" style={{ background: t.bgCard, boxShadow: t.shadowCard }}>
-            <span className="text-5xl block mb-4">✅</span>
-            <h2 className="text-xl font-medium m-0 mb-2" style={{ fontFamily: 'Cormorant Garamond, serif', color: t.textPrimary }}>
-              Invitation Sent!
-            </h2>
-            <p className="text-sm mb-5" style={{ color: t.textMuted, lineHeight: 1.6 }}>
-              We&apos;ve sent an email to <strong>{spouseEmail}</strong>. You can also share this link directly:
-            </p>
-            <div className="rounded-xl p-4 mb-4 flex items-center gap-2" style={{ background: t.bgInput, border: `1px solid ${t.border}` }}>
-              <input
-                readOnly
-                value={inviteLink}
-                className="flex-1 text-xs bg-transparent border-none outline-none"
-                style={{ color: t.textSecondary, fontFamily: 'Source Sans 3, sans-serif' }}
-              />
-              <button
-                onClick={copyLink}
-                className="px-3 py-1.5 rounded-lg text-xs font-semibold border-none cursor-pointer flex-shrink-0"
-                style={{ background: copied ? t.greenBg : t.goldBg, color: copied ? t.green : t.textLink, fontFamily: 'Source Sans 3, sans-serif' }}
-              >
-                {copied ? 'Copied ✓' : 'Copy'}
-              </button>
-            </div>
-            <Link href="/dashboard">
-              <span className="text-sm font-semibold" style={{ color: t.textLink }}>← Back to dashboard</span>
-            </Link>
-          </div>
-        ) : (
-          /* Invite form */
-          <div className="rounded-3xl p-8" style={{ background: t.bgCard, boxShadow: t.shadowCard }}>
-            <div className="text-center mb-6">
-              <span className="text-4xl block mb-3">💑</span>
-              <h2 className="text-xl font-medium m-0 mb-2" style={{ fontFamily: 'Cormorant Garamond, serif', color: t.textPrimary }}>
-                Better Together
-              </h2>
-              <p className="text-sm m-0" style={{ color: t.textMuted, lineHeight: 1.6 }}>
-                Invite your spouse to unlock shared tools, couple exercises, love notes, and the Together dashboard.
-              </p>
-            </div>
-
-            <div className="mb-3">
-              <label className="text-xs font-semibold uppercase tracking-wider block mb-1.5" style={{ color: t.textSecondary, fontFamily: 'Source Sans 3, sans-serif' }}>
-                Their email *
-              </label>
-              <input
-                type="email"
-                value={spouseEmail}
-                onChange={e => setSpouseEmail(e.target.value)}
-                placeholder="spouse@email.com"
-                className="w-full px-4 py-3 rounded-xl text-sm outline-none"
-                style={{ border: `1.5px solid ${t.border}`, fontFamily: 'Source Sans 3, sans-serif', background: t.bgInput, color: t.textPrimary }}
-              />
-            </div>
-
-            <div className="mb-3">
-              <label className="text-xs font-semibold uppercase tracking-wider block mb-1.5" style={{ color: t.textSecondary, fontFamily: 'Source Sans 3, sans-serif' }}>
-                Their first name
-              </label>
-              <input
-                type="text"
-                value={spouseName}
-                onChange={e => setSpouseName(e.target.value)}
-                placeholder="Optional"
-                className="w-full px-4 py-3 rounded-xl text-sm outline-none"
-                style={{ border: `1.5px solid ${t.border}`, fontFamily: 'Source Sans 3, sans-serif', background: t.bgInput, color: t.textPrimary }}
-              />
-            </div>
-
-            <div className="mb-5">
-              <label className="text-xs font-semibold uppercase tracking-wider block mb-1.5" style={{ color: t.textSecondary, fontFamily: 'Source Sans 3, sans-serif' }}>
-                Personal message
-              </label>
-              <textarea
-                value={message}
-                onChange={e => setMessage(e.target.value)}
-                placeholder="Hey love, I found this app for us..."
-                rows={3}
-                className="w-full px-4 py-3 rounded-xl text-sm resize-none outline-none"
-                style={{ border: `1.5px solid ${t.border}`, fontFamily: 'Source Sans 3, sans-serif', background: t.bgInput, color: t.textPrimary }}
-              />
-            </div>
-
-            <button
-              onClick={sendInvite}
-              disabled={!spouseEmail.trim() || sending}
-              className="w-full py-4 rounded-xl text-base font-semibold text-white border-none cursor-pointer mb-3"
-              style={{ fontFamily: 'Source Sans 3, sans-serif', background: spouseEmail.trim() ? 'linear-gradient(135deg, #B8860B, #8B6914)' : t.border }}
-            >
-              {sending ? 'Sending...' : 'Send Invitation 💌'}
-            </button>
-
-            <div className="text-center">
-              <Link href="/dashboard">
-                <span className="text-xs" style={{ color: t.textMuted }}>Skip for now</span>
-              </Link>
-            </div>
-          </div>
-        )}
-
-        {/* What they'll get */}
-        <div className="rounded-2xl p-5 mt-4" style={{ background: t.bgCard, boxShadow: t.shadowCard }}>
-          <div className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: t.textSecondary, fontFamily: 'Source Sans 3, sans-serif' }}>
-            What unlocks when you&apos;re linked
-          </div>
-          {[
-            { icon: '📋', label: 'Weekly check-ins — reflect privately, reveal together' },
-            { icon: '💌', label: 'Love notes — send encouragement any time' },
-            { icon: '✏️', label: 'Couple exercises — guided conversations for 2' },
-            { icon: '🎯', label: 'Shared goals — grow intentionally together' },
-            { icon: '📊', label: 'Together dashboard — see your joint progress' },
-          ].map((item, i) => (
-            <div key={i} className="flex items-center gap-3 mb-2.5 last:mb-0">
-              <span className="text-base">{item.icon}</span>
-              <span className="text-sm" style={{ color: t.textPrimary, fontFamily: 'Source Sans 3, sans-serif', lineHeight: 1.5 }}>{item.label}</span>
-            </div>
-          ))}
-        </div>
-
-        {/* Footer */}
-        <div className="text-center py-6">
-          <p className="text-sm italic m-0" style={{ fontFamily: 'Cormorant Garamond, serif', color: t.textMuted }}>
-            &ldquo;A cord of three strands is not quickly broken.&rdquo;
-          </p>
-          <p className="text-xs m-0 mt-1" style={{ color: t.textLight }}>Ecclesiastes 4:12</p>
-        </div>
-      </div>
-    </div>
-  );
-}
+const TABS: { key: Tab; label: string; icon: string; premium: boolean }[] = [
+  { key: 'overview', label: 'Overview', icon: '💛', premium: false },
+  { key: 'exercises', label: 'Exercises', icon: '✏️', premium: true },
+  { key: 'checkin', label: 'Check-In', icon: '📋', premium: true },
+  { key: 'notes', label: 'Notes', icon: '💌', premium: true },
+  { key: 'goals', label: 'Goals', icon: '🎯', premium: false },
+];
 
 export default function CoupleDashboard() {
   const [profile, setProfile] = useState<any>(null);
@@ -315,34 +37,26 @@ export default function CoupleDashboard() {
   const [notes, setNotes] = useState<any[]>([]);
   const [goals, setGoals] = useState<any[]>([]);
   const [coupleSummary, setCoupleSummary] = useState<any>(null);
-  
+
   const [tab, setTab] = useState<Tab>('overview');
   const [selectedExercise, setSelectedExercise] = useState<any>(null);
   const [exerciseStep, setExerciseStep] = useState(0);
-  
-  // Check-in form
-  const [ciRating, setCiRating] = useState(0);
-  const [ciHighlight, setCiHighlight] = useState('');
-  const [ciNeed, setCiNeed] = useState('');
-  const [ciGratitude, setCiGratitude] = useState('');
-  
-  // Love note form
-  const [noteMessage, setNoteMessage] = useState('');
-  const [noteType, setNoteType] = useState('love');
-  
-  // Goal form
-  const [goalTitle, setGoalTitle] = useState('');
-  const [goalPillar, setGoalPillar] = useState('general');
-  const [showGoalForm, setShowGoalForm] = useState(false);
-  
+
   const [loading, setLoading] = useState(true);
   const [visible, setVisible] = useState(false);
 
   const supabase = createClient();
   const router = useRouter();
+  const { isPremium, loading: subLoading } = useSubscription();
 
   useEffect(() => { loadData(); }, []);
   useEffect(() => { if (!loading) setTimeout(() => setVisible(true), 100); }, [loading]);
+
+  function getMonday(d: Date) {
+    const day = d.getDay();
+    const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+    return new Date(d.setDate(diff));
+  }
 
   async function loadData() {
     const { data: { user } } = await supabase.auth.getUser();
@@ -351,7 +65,7 @@ export default function CoupleDashboard() {
     const { data: prof } = await supabase.from('profiles').select('*').eq('id', user.id).single();
     if (prof) {
       setProfile(prof);
-      
+
       if (prof.partner_id) {
         const { data: part } = await supabase.from('profiles').select('*').eq('id', prof.partner_id).single();
         if (part) setPartner(part);
@@ -390,13 +104,7 @@ export default function CoupleDashboard() {
     setLoading(false);
   }
 
-  function getMonday(d: Date) {
-    const day = d.getDay();
-    const diff = d.getDate() - day + (day === 0 ? -6 : 1);
-    return new Date(d.setDate(diff));
-  }
-
-  async function submitCheckIn() {
+  async function submitCheckIn(ciRating: number, ciHighlight: string, ciNeed: string, ciGratitude: string) {
     if (!profile || !couple || ciRating === 0) return;
     const monday = getMonday(new Date()).toISOString().split('T')[0];
     const isSpouse1 = couple.spouse_1_id === profile.id;
@@ -423,37 +131,30 @@ export default function CoupleDashboard() {
       if (otherSubmitted) updateData.both_submitted = true;
       await supabase.from('couple_check_ins').update(updateData).eq('id', checkIn.id);
     } else {
-      await supabase.from('couple_check_ins').insert({
-        couple_id: couple.id,
-        week_of: monday,
-        ...updateData,
-      });
+      await supabase.from('couple_check_ins').insert({ couple_id: couple.id, week_of: monday, ...updateData });
     }
     loadData();
   }
 
-  async function sendLoveNote() {
-    if (!profile || !couple || !noteMessage.trim()) return;
+  async function sendLoveNote(message: string, noteType: string) {
+    if (!profile || !couple || !message.trim()) return;
     await supabase.from('love_notes').insert({
       couple_id: couple.id,
       sender_id: profile.id,
-      message: noteMessage.trim(),
+      message: message.trim(),
       note_type: noteType,
     });
-    setNoteMessage('');
     loadData();
   }
 
-  async function addGoal() {
-    if (!profile || !couple || !goalTitle.trim()) return;
+  async function addGoal(title: string, pillar: string) {
+    if (!profile || !couple || !title.trim()) return;
     await supabase.from('couple_goals').insert({
       couple_id: couple.id,
-      title: goalTitle.trim(),
-      pillar: goalPillar,
+      title: title.trim(),
+      pillar,
       created_by: profile.id,
     });
-    setGoalTitle('');
-    setShowGoalForm(false);
     loadData();
   }
 
@@ -489,14 +190,6 @@ export default function CoupleDashboard() {
     return <SoloInviteScreen profile={profile} couple={couple} />;
   }
 
-  const TABS: { key: Tab; label: string; icon: string }[] = [
-    { key: 'overview', label: 'Overview', icon: '💛' },
-    { key: 'exercises', label: 'Exercises', icon: '✏️' },
-    { key: 'checkin', label: 'Check-In', icon: '📋' },
-    { key: 'notes', label: 'Notes', icon: '💌' },
-    { key: 'goals', label: 'Goals', icon: '🎯' },
-  ];
-
   return (
     <div className="min-h-screen px-4 py-6" style={{ background: t.bgPrimary }}>
       <div className="max-w-2xl mx-auto" style={{ opacity: visible ? 1 : 0, transform: visible ? 'translateY(0)' : 'translateY(12px)', transition: 'all 0.6s ease' }}>
@@ -523,414 +216,64 @@ export default function CoupleDashboard() {
 
         {/* Tab nav */}
         <div className="flex gap-1.5 mb-4 overflow-x-auto pb-1">
-          {TABS.map(tb => (
-            <button
-              key={tb.key}
-              onClick={() => { setTab(tb.key); setSelectedExercise(null); }}
-              className="flex-shrink-0 px-4 py-2.5 rounded-xl text-sm font-semibold cursor-pointer border transition-all"
-              style={{
-                fontFamily: 'Source Sans 3, sans-serif',
-                background: tab === tb.key ? t.goldBg : t.bgCard,
-                borderColor: tab === tb.key ? t.textLink : t.border,
-                color: tab === tb.key ? t.textPrimary : t.textMuted,
-              }}
-            >
-              {tb.icon} {tb.label}
-            </button>
-          ))}
+          {TABS.map(tb => {
+            const isLocked = tb.premium && !isPremium && !subLoading;
+            return (
+              <button
+                key={tb.key}
+                onClick={() => { setTab(tb.key); setSelectedExercise(null); }}
+                className="flex-shrink-0 px-4 py-2.5 rounded-xl text-sm font-semibold cursor-pointer border transition-all flex items-center gap-1"
+                style={{
+                  fontFamily: 'Source Sans 3, sans-serif',
+                  background: tab === tb.key ? t.goldBg : t.bgCard,
+                  borderColor: tab === tb.key ? t.textLink : t.border,
+                  color: tab === tb.key ? t.textPrimary : t.textMuted,
+                }}
+              >
+                {tb.icon} {tb.label}
+                {isLocked && <PremiumBadge />}
+              </button>
+            );
+          })}
         </div>
 
-        {/* ======= OVERVIEW TAB ======= */}
         {tab === 'overview' && (
-          <>
-            {/* Couple streaks */}
-            <div className="rounded-2xl p-5 mb-3" style={{ background: t.bgCard, boxShadow: t.shadowCard }}>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="text-center">
-                  <div className="text-sm font-semibold mb-1" style={{ fontFamily: 'Source Sans 3, sans-serif', color: t.textPrimary }}>
-                    {profile?.first_name}
-                  </div>
-                  <div className="flex items-center justify-center gap-1.5">
-                    <span>🔥</span>
-                    <span className="text-2xl font-bold" style={{ color: t.textLink, fontFamily: 'Source Sans 3, sans-serif' }}>
-                      {profile?.streak_count || 0}
-                    </span>
-                  </div>
-                  <span className="text-xs" style={{ color: t.textMuted }}>day streak</span>
-                </div>
-                <div className="text-center">
-                  <div className="text-sm font-semibold mb-1" style={{ fontFamily: 'Source Sans 3, sans-serif', color: t.textPrimary }}>
-                    {partner?.first_name}
-                  </div>
-                  <div className="flex items-center justify-center gap-1.5">
-                    <span>🔥</span>
-                    <span className="text-2xl font-bold" style={{ color: t.textLink, fontFamily: 'Source Sans 3, sans-serif' }}>
-                      {partner?.streak_count || 0}
-                    </span>
-                  </div>
-                  <span className="text-xs" style={{ color: t.textMuted }}>day streak</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Quick actions */}
-            <div className="grid grid-cols-3 gap-2.5 mb-3">
-              <button onClick={() => setTab('checkin')} className="rounded-xl p-3 text-center cursor-pointer border-none transition-all hover:-translate-y-0.5" style={{ background: t.bgCard, boxShadow: t.shadowCard }}>
-                <span className="text-xl">📋</span>
-                <div className="text-xs font-semibold mt-1" style={{ fontFamily: 'Source Sans 3, sans-serif', color: t.textPrimary }}>Check-In</div>
-              </button>
-              <button onClick={() => setTab('notes')} className="rounded-xl p-3 text-center cursor-pointer border-none transition-all hover:-translate-y-0.5" style={{ background: t.bgCard, boxShadow: t.shadowCard }}>
-                <span className="text-xl">💌</span>
-                <div className="text-xs font-semibold mt-1" style={{ fontFamily: 'Source Sans 3, sans-serif', color: t.textPrimary }}>Send Note</div>
-              </button>
-              <button onClick={() => setTab('exercises')} className="rounded-xl p-3 text-center cursor-pointer border-none transition-all hover:-translate-y-0.5" style={{ background: t.bgCard, boxShadow: t.shadowCard }}>
-                <span className="text-xl">✏️</span>
-                <div className="text-xs font-semibold mt-1" style={{ fontFamily: 'Source Sans 3, sans-serif', color: t.textPrimary }}>Exercise</div>
-              </button>
-            </div>
-
-            {/* Recent notes */}
-            {notes.length > 0 && (
-              <div className="rounded-2xl p-5 mb-3" style={{ background: t.bgCard, boxShadow: t.shadowCard }}>
-                <div className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: t.textSecondary, fontFamily: 'Source Sans 3, sans-serif' }}>
-                  Recent Love Notes
-                </div>
-                {notes.slice(0, 3).map(n => {
-                  const nt = NOTE_TYPES[n.note_type] || NOTE_TYPES.love;
-                  const isMine = n.sender_id === profile?.id;
-                  return (
-                    <div key={n.id} className="flex items-start gap-3 mb-3 last:mb-0">
-                      <span className="text-lg">{nt.icon}</span>
-                      <div className="flex-1">
-                        <div className="text-xs mb-0.5" style={{ color: t.textMuted, fontFamily: 'Source Sans 3, sans-serif' }}>
-                          {isMine ? 'You' : partner?.first_name} · {new Date(n.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
-                        </div>
-                        <div className="text-sm" style={{ fontFamily: 'Source Sans 3, sans-serif', color: t.textPrimary, lineHeight: 1.5 }}>
-                          {n.message}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-
-            {/* Goals */}
-            {goals.length > 0 && (
-              <div className="rounded-2xl p-5 mb-3" style={{ background: t.bgCard, boxShadow: t.shadowCard }}>
-                <div className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: t.textSecondary, fontFamily: 'Source Sans 3, sans-serif' }}>
-                  Active Goals
-                </div>
-                {goals.slice(0, 3).map(g => {
-                  const ps = PILLAR_STYLES[g.pillar] || PILLAR_STYLES.general;
-                  return (
-                    <div key={g.id} className="flex items-center gap-3 mb-2.5 last:mb-0">
-                      <span className="text-sm">{ps.icon}</span>
-                      <span className="text-sm flex-1" style={{ fontFamily: 'Source Sans 3, sans-serif', color: t.textPrimary }}>
-                        {g.title}
-                      </span>
-                      <button
-                        onClick={() => completeGoal(g.id)}
-                        className="text-xs px-2.5 py-1 rounded-lg cursor-pointer border-none"
-                        style={{ background: t.greenBg, color: t.green, fontFamily: 'Source Sans 3, sans-serif', fontWeight: 600 }}
-                      >
-                        Done ✓
-                      </button>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </>
+          <OverviewTab profile={profile} partner={partner} notes={notes} goals={goals} setTab={setTab} completeGoal={completeGoal} />
         )}
 
-        {/* ======= EXERCISES TAB ======= */}
-        {tab === 'exercises' && !selectedExercise && (
-          <div className="space-y-2.5">
-            {exercises.map(ex => {
-              const ps = PILLAR_STYLES[ex.pillar] || PILLAR_STYLES.general;
-              const dc = DIFF_COLORS[ex.difficulty] || DIFF_COLORS.easy;
-              return (
-                <button
-                  key={ex.id}
-                  onClick={() => { setSelectedExercise(ex); setExerciseStep(0); }}
-                  className="w-full rounded-2xl p-5 text-left cursor-pointer border-none transition-all hover:-translate-y-0.5"
-                  style={{ background: t.bgCard, boxShadow: t.shadowCard }}
-                >
-                  <div className="flex items-center gap-3.5">
-                    <span className="text-2xl">{ex.icon}</span>
-                    <div className="flex-1">
-                      <div className="text-sm font-semibold" style={{ fontFamily: 'Source Sans 3, sans-serif', color: t.textPrimary }}>
-                        {ex.title}
-                      </div>
-                      <div className="text-xs mt-0.5" style={{ color: t.textMuted, lineHeight: 1.5 }}>{ex.description}</div>
-                      <div className="flex items-center gap-2 mt-2">
-                        <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: ps.bg, color: ps.text, fontWeight: 600 }}>
-                          {ps.label}
-                        </span>
-                        <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: dc.bg, color: dc.text, fontWeight: 600 }}>
-                          {ex.difficulty}
-                        </span>
-                        <span className="text-xs" style={{ color: t.textMuted }}>~{ex.duration_minutes} min</span>
-                      </div>
-                    </div>
-                    <span style={{ color: t.textLink }}>→</span>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
+        {tab === 'exercises' && (
+          isPremium || subLoading ? (
+            <ExercisesTab
+              exercises={exercises}
+              selectedExercise={selectedExercise}
+              setSelectedExercise={setSelectedExercise}
+              exerciseStep={exerciseStep}
+              setExerciseStep={setExerciseStep}
+              completeExercise={completeExercise}
+            />
+          ) : (
+            <UpgradePrompt feature="Couple Exercises" compact />
+          )
         )}
 
-        {/* Exercise detail */}
-        {tab === 'exercises' && selectedExercise && (
-          <div className="rounded-3xl p-7" style={{ background: t.bgCard, boxShadow: t.shadowCard }}>
-            <button
-              onClick={() => { setSelectedExercise(null); setExerciseStep(0); }}
-              className="text-sm border-none bg-transparent cursor-pointer mb-4"
-              style={{ color: t.textMuted, fontFamily: 'Source Sans 3, sans-serif' }}
-            >
-              ← Back
-            </button>
-
-            <div className="flex items-center gap-3 mb-4">
-              <span className="text-3xl">{selectedExercise.icon}</span>
-              <div>
-                <h2 className="text-2xl font-medium m-0" style={{ fontFamily: 'Cormorant Garamond, serif', color: t.textPrimary }}>
-                  {selectedExercise.title}
-                </h2>
-                <div className="text-xs mt-1" style={{ color: t.textMuted }}>
-                  ~{selectedExercise.duration_minutes} min · {selectedExercise.frequency_suggestion}
-                </div>
-              </div>
-            </div>
-
-            {/* Progress */}
-            <div className="flex gap-1.5 mb-5">
-              {(selectedExercise.instructions || []).map((_: any, i: number) => (
-                <div key={i} className="flex-1 h-1.5 rounded-full" style={{ background: i <= exerciseStep ? t.textLink : t.border }} />
-              ))}
-            </div>
-
-            {/* Current step */}
-            {selectedExercise.instructions?.[exerciseStep] && (
-              <div className="mb-5">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold" style={{ background: t.goldBg, color: t.textLink }}>
-                    {selectedExercise.instructions[exerciseStep].step}
-                  </div>
-                  <h3 className="text-lg font-medium m-0" style={{ fontFamily: 'Cormorant Garamond, serif', color: t.textPrimary }}>
-                    {selectedExercise.instructions[exerciseStep].title}
-                  </h3>
-                </div>
-                <p className="text-sm" style={{ fontFamily: 'Source Sans 3, sans-serif', color: t.textPrimary, lineHeight: 1.7 }}>
-                  {selectedExercise.instructions[exerciseStep].text}
-                </p>
-              </div>
-            )}
-
-            {/* Scripture on last step */}
-            {exerciseStep === (selectedExercise.instructions?.length || 1) - 1 && selectedExercise.scripture_text && (
-              <div className="rounded-xl p-5 mb-5" style={{ background: t.bgCardHover, border: `1px solid ${t.border}` }}>
-                <p className="text-base italic m-0 mb-2" style={{ fontFamily: 'Cormorant Garamond, serif', color: t.textPrimary, lineHeight: 1.7 }}>
-                  &ldquo;{selectedExercise.scripture_text}&rdquo;
-                </p>
-                <p className="text-xs m-0" style={{ color: t.textLink, fontFamily: 'Source Sans 3, sans-serif', fontWeight: 600 }}>
-                  {selectedExercise.scripture_reference}
-                </p>
-              </div>
-            )}
-
-            {/* Nav */}
-            <div className="flex gap-3">
-              {exerciseStep > 0 && (
-                <button onClick={() => setExerciseStep(exerciseStep - 1)} className="flex-1 py-4 rounded-xl text-sm font-semibold cursor-pointer" style={{ background: 'transparent', border: `1.5px solid ${t.border}`, color: t.textSecondary, fontFamily: 'Source Sans 3, sans-serif' }}>
-                  ← Previous
-                </button>
-              )}
-              {exerciseStep < (selectedExercise.instructions?.length || 1) - 1 ? (
-                <button onClick={() => setExerciseStep(exerciseStep + 1)} className="flex-1 py-4 rounded-xl text-sm font-semibold text-white border-none cursor-pointer" style={{ background: 'linear-gradient(135deg, #B8860B, #8B6914)', fontFamily: 'Source Sans 3, sans-serif' }}>
-                  Next Step →
-                </button>
-              ) : (
-                <button onClick={() => completeExercise(selectedExercise.id)} className="flex-1 py-4 rounded-xl text-sm font-semibold text-white border-none cursor-pointer" style={{ background: 'linear-gradient(135deg, #5B8A3C, #3D6B28)', fontFamily: 'Source Sans 3, sans-serif' }}>
-                  Complete Exercise ✓
-                </button>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* ======= CHECK-IN TAB ======= */}
         {tab === 'checkin' && (
-          <div className="rounded-3xl p-7" style={{ background: t.bgCard, boxShadow: t.shadowCard }}>
-            <div className="text-center mb-6">
-              <span className="text-3xl">📋</span>
-              <h2 className="text-2xl font-medium mt-2 mb-1" style={{ fontFamily: 'Cormorant Garamond, serif', color: t.textPrimary }}>
-                Weekly Check-In
-              </h2>
-              <p className="text-sm" style={{ color: t.textMuted, fontFamily: 'Source Sans 3, sans-serif' }}>
-                A private reflection revealed to your spouse only after both submit
-              </p>
-            </div>
-
-            {/* Connection rating */}
-            <div className="mb-5">
-              <label className="text-xs font-semibold uppercase tracking-wider block mb-3" style={{ color: t.textSecondary, fontFamily: 'Source Sans 3, sans-serif' }}>
-                How connected did you feel this week?
-              </label>
-              <div className="flex gap-2">
-                {[1, 2, 3, 4, 5].map(n => (
-                  <button key={n} onClick={() => setCiRating(n)} className="flex-1 py-3 rounded-xl text-center cursor-pointer transition-all" style={{ background: ciRating === n ? t.goldBg : t.bgCardHover, border: `1.5px solid ${ciRating === n ? t.textLink : t.border}`, fontFamily: 'Source Sans 3, sans-serif', fontSize: 18, fontWeight: 700, color: ciRating === n ? t.textLink : t.textMuted }}>
-                    {n}
-                  </button>
-                ))}
-              </div>
-              <div className="flex justify-between text-xs mt-1.5" style={{ color: t.textMuted }}>
-                <span>Disconnected</span><span>Very connected</span>
-              </div>
-            </div>
-
-            {/* Highlight */}
-            <div className="mb-4">
-              <label className="text-xs font-semibold uppercase tracking-wider block mb-2" style={{ color: t.textSecondary, fontFamily: 'Source Sans 3, sans-serif' }}>
-                A highlight from this week
-              </label>
-              <textarea value={ciHighlight} onChange={e => setCiHighlight(e.target.value)} placeholder="What was a good moment between us?" rows={2} className="w-full px-4 py-3 rounded-xl border text-sm resize-none outline-none" style={{ borderColor: t.border, fontFamily: 'Source Sans 3, sans-serif', background: t.bgInput, color: t.textPrimary }} />
-            </div>
-
-            {/* Need */}
-            <div className="mb-4">
-              <label className="text-xs font-semibold uppercase tracking-wider block mb-2" style={{ color: t.textSecondary, fontFamily: 'Source Sans 3, sans-serif' }}>
-                Something I need from you this week
-              </label>
-              <textarea value={ciNeed} onChange={e => setCiNeed(e.target.value)} placeholder="Be specific and kind..." rows={2} className="w-full px-4 py-3 rounded-xl border text-sm resize-none outline-none" style={{ borderColor: t.border, fontFamily: 'Source Sans 3, sans-serif', background: t.bgInput, color: t.textPrimary }} />
-            </div>
-
-            {/* Gratitude */}
-            <div className="mb-6">
-              <label className="text-xs font-semibold uppercase tracking-wider block mb-2" style={{ color: t.textSecondary, fontFamily: 'Source Sans 3, sans-serif' }}>
-                Something I&apos;m grateful for about you
-              </label>
-              <textarea value={ciGratitude} onChange={e => setCiGratitude(e.target.value)} placeholder="What do I appreciate about you?" rows={2} className="w-full px-4 py-3 rounded-xl border text-sm resize-none outline-none" style={{ borderColor: t.border, fontFamily: 'Source Sans 3, sans-serif', background: t.bgInput, color: t.textPrimary }} />
-            </div>
-
-            <div className="rounded-xl p-4 mb-5" style={{ background: t.goldBg, border: `1px solid ${t.textLink}20` }}>
-              <p className="text-xs m-0" style={{ fontFamily: 'Source Sans 3, sans-serif', color: t.textSecondary, lineHeight: 1.6 }}>
-                🔒 Your answers are <strong>private until both of you submit</strong>. Then you&apos;ll see each other&apos;s responses together.
-              </p>
-            </div>
-
-            <button onClick={submitCheckIn} disabled={ciRating === 0} className="w-full py-4 rounded-xl text-base font-semibold text-white border-none cursor-pointer" style={{ fontFamily: 'Source Sans 3, sans-serif', background: ciRating > 0 ? 'linear-gradient(135deg, #B8860B, #8B6914)' : t.border, color: ciRating > 0 ? '#FFF' : t.textMuted }}>
-              Submit Check-In
-            </button>
-          </div>
+          isPremium || subLoading ? (
+            <CheckInTab submitCheckIn={submitCheckIn} />
+          ) : (
+            <UpgradePrompt feature="Weekly Check-In" compact />
+          )
         )}
 
-        {/* ======= NOTES TAB ======= */}
         {tab === 'notes' && (
-          <>
-            {/* Send note */}
-            <div className="rounded-2xl p-5 mb-3" style={{ background: t.bgCard, boxShadow: t.shadowCard }}>
-              <div className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: t.textSecondary, fontFamily: 'Source Sans 3, sans-serif' }}>
-                Send {partner?.first_name} a note
-              </div>
-
-              <div className="flex gap-1.5 mb-3 flex-wrap">
-                {Object.entries(NOTE_TYPES).map(([key, nt]) => (
-                  <button key={key} onClick={() => setNoteType(key)} className="px-3 py-1.5 rounded-full text-xs font-semibold cursor-pointer border transition-all" style={{ background: noteType === key ? nt.bg : t.bgCardHover, borderColor: noteType === key ? t.textLink : t.border, color: noteType === key ? t.textPrimary : t.textMuted, fontFamily: 'Source Sans 3, sans-serif' }}>
-                    {nt.icon} {nt.label}
-                  </button>
-                ))}
-              </div>
-
-              <textarea value={noteMessage} onChange={e => setNoteMessage(e.target.value)} placeholder={`Write something from the heart...`} rows={3} className="w-full px-4 py-3 rounded-xl border text-sm resize-none outline-none mb-3" style={{ borderColor: t.border, fontFamily: 'Source Sans 3, sans-serif', background: t.bgInput, color: t.textPrimary }} />
-
-              <button onClick={sendLoveNote} disabled={!noteMessage.trim()} className="w-full py-3 rounded-xl text-sm font-semibold text-white border-none cursor-pointer" style={{ fontFamily: 'Source Sans 3, sans-serif', background: noteMessage.trim() ? 'linear-gradient(135deg, #B8860B, #8B6914)' : t.border }}>
-                Send 💌
-              </button>
-            </div>
-
-            {/* Note history */}
-            <div className="rounded-2xl p-5" style={{ background: t.bgCard, boxShadow: t.shadowCard }}>
-              <div className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: t.textSecondary, fontFamily: 'Source Sans 3, sans-serif' }}>
-                Note History
-              </div>
-              {notes.length === 0 ? (
-                <p className="text-sm text-center py-4" style={{ color: t.textMuted }}>No notes yet — send the first one!</p>
-              ) : (
-                notes.map(n => {
-                  const nt = NOTE_TYPES[n.note_type] || NOTE_TYPES.love;
-                  const isMine = n.sender_id === profile?.id;
-                  return (
-                    <div key={n.id} className="flex items-start gap-3 mb-4 last:mb-0 p-3 rounded-xl" style={{ background: isMine ? t.bgCardHover : nt.bg }}>
-                      <span className="text-lg flex-shrink-0">{nt.icon}</span>
-                      <div className="flex-1">
-                        <div className="text-xs mb-1" style={{ color: t.textMuted, fontFamily: 'Source Sans 3, sans-serif' }}>
-                          {isMine ? 'You' : partner?.first_name} · {new Date(n.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
-                        </div>
-                        <div className="text-sm" style={{ fontFamily: 'Source Sans 3, sans-serif', color: t.textPrimary, lineHeight: 1.6 }}>
-                          {n.message}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })
-              )}
-            </div>
-          </>
+          isPremium || subLoading ? (
+            <NotesTab profile={profile} partner={partner} notes={notes} sendLoveNote={sendLoveNote} />
+          ) : (
+            <UpgradePrompt feature="Love Notes" compact />
+          )
         )}
 
-        {/* ======= GOALS TAB ======= */}
         {tab === 'goals' && (
-          <>
-            {/* Add goal */}
-            {showGoalForm ? (
-              <div className="rounded-2xl p-5 mb-3" style={{ background: t.bgCard, boxShadow: t.shadowCard }}>
-                <input value={goalTitle} onChange={e => setGoalTitle(e.target.value)} placeholder="What do you want to work on together?" className="w-full px-4 py-3 rounded-xl border text-sm outline-none mb-3" style={{ borderColor: t.border, fontFamily: 'Source Sans 3, sans-serif', background: t.bgInput, color: t.textPrimary }} />
-                <div className="flex gap-1.5 mb-3 flex-wrap">
-                  {Object.entries(PILLAR_STYLES).map(([key, ps]) => (
-                    <button key={key} onClick={() => setGoalPillar(key)} className="px-3 py-1.5 rounded-full text-xs font-semibold cursor-pointer border" style={{ background: goalPillar === key ? ps.bg : t.bgCardHover, borderColor: goalPillar === key ? t.textLink : t.border, color: goalPillar === key ? ps.text : t.textMuted, fontFamily: 'Source Sans 3, sans-serif' }}>
-                      {ps.icon} {ps.label}
-                    </button>
-                  ))}
-                </div>
-                <div className="flex gap-2">
-                  <button onClick={() => setShowGoalForm(false)} className="flex-1 py-3 rounded-xl text-sm font-semibold cursor-pointer" style={{ background: 'transparent', border: `1.5px solid ${t.border}`, color: t.textSecondary, fontFamily: 'Source Sans 3, sans-serif' }}>Cancel</button>
-                  <button onClick={addGoal} disabled={!goalTitle.trim()} className="flex-1 py-3 rounded-xl text-sm font-semibold text-white border-none cursor-pointer" style={{ fontFamily: 'Source Sans 3, sans-serif', background: goalTitle.trim() ? 'linear-gradient(135deg, #B8860B, #8B6914)' : t.border }}>Add Goal</button>
-                </div>
-              </div>
-            ) : (
-              <button onClick={() => setShowGoalForm(true)} className="w-full rounded-2xl p-4 mb-3 text-center cursor-pointer border-none" style={{ background: t.bgCard, boxShadow: t.shadowCard, border: `1.5px dashed ${t.textLink}40` }}>
-                <span className="text-sm font-semibold" style={{ color: t.textLink, fontFamily: 'Source Sans 3, sans-serif' }}>+ Add a Shared Goal</span>
-              </button>
-            )}
-
-            {/* Goals list */}
-            <div className="rounded-2xl p-5" style={{ background: t.bgCard, boxShadow: t.shadowCard }}>
-              {goals.length === 0 ? (
-                <p className="text-sm text-center py-4" style={{ color: t.textMuted }}>No goals yet — set your first shared goal!</p>
-              ) : (
-                goals.map(g => {
-                  const ps = PILLAR_STYLES[g.pillar] || PILLAR_STYLES.general;
-                  return (
-                    <div key={g.id} className="flex items-center gap-3 mb-3 last:mb-0 p-3 rounded-xl" style={{ background: t.bgCardHover, border: `1px solid ${t.border}` }}>
-                      <span className="text-lg">{ps.icon}</span>
-                      <div className="flex-1">
-                        <div className="text-sm font-semibold" style={{ fontFamily: 'Source Sans 3, sans-serif', color: t.textPrimary }}>{g.title}</div>
-                        <div className="text-xs mt-0.5" style={{ color: t.textMuted }}>
-                          {ps.label} · Added {new Date(g.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
-                        </div>
-                      </div>
-                      <button onClick={() => completeGoal(g.id)} className="text-xs px-3 py-1.5 rounded-lg cursor-pointer border-none font-semibold" style={{ background: t.greenBg, color: t.green, fontFamily: 'Source Sans 3, sans-serif' }}>
-                        Done ✓
-                      </button>
-                    </div>
-                  );
-                })
-              )}
-            </div>
-          </>
+          <GoalsTab goals={goals} addGoal={addGoal} completeGoal={completeGoal} />
         )}
 
         {/* Footer */}

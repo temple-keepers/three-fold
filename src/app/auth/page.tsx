@@ -59,12 +59,8 @@ export default function AuthPage() {
           <div className="mx-auto mb-4" style={{ width: 72 }}>
             <ThreefoldLogo size={72} />
           </div>
-          <h1 className="text-3xl font-bold tracking-[0.14em] uppercase" style={{ fontFamily: 'Cinzel, serif', color: t.textPrimary }}>Threefold</h1>
-          <div className="flex items-center justify-center gap-2 mt-0.5">
-            <div className="w-4 h-px" style={{ background: t.textPrimary, opacity: 0.25 }} />
-            <span className="text-lg tracking-[0.3em] uppercase" style={{ fontFamily: 'Cinzel, serif', color: '#C7A23A', fontWeight: 400 }}>Cord</span>
-            <div className="w-4 h-px" style={{ background: t.textPrimary, opacity: 0.25 }} />
-          </div>
+          <h1 className="text-3xl font-bold tracking-[0.14em] uppercase" style={{ fontFamily: 'Cinzel, serif', color: t.textPrimary }}>Cleave</h1>
+          <p className="mt-1 text-sm tracking-[0.15em] uppercase" style={{ fontFamily: 'Cinzel, serif', color: '#C7A23A', fontWeight: 400 }}>Hold Fast</p>
           <p className="mt-3 text-sm" style={{ fontFamily: 'DM Sans, sans-serif', color: t.textSecondary }}>
             {mode === 'signup' ? 'Begin your covenant journey' : 'Welcome back'}
           </p>

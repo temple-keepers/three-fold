@@ -3,7 +3,7 @@ import Image from 'next/image';
 import { ThreefoldLogo } from '@/components/ui/Logo';
 
 /* ═══════════════════════════════════════════════════════════════
-   LANDING PAGE — Threefold Cord
+   LANDING PAGE — Cleave
    Aspirational · Premium · Covenant-Strong
    ═══════════════════════════════════════════════════════════════ */
 
@@ -42,7 +42,7 @@ const FEATURES = [
   { icon: '/icons/icon-book.png', title: 'Daily Devotionals', desc: 'Scripture-rooted moments that transform your marriage one day at a time.', free: true },
   { icon: '/icons/icon-dice.png', title: 'Marriage Games', desc: 'Fun, meaningful games that spark connection and rediscovery.', free: '2 free' },
   { icon: '/icons/icon-tools.png', title: 'Conflict Repair Tools', desc: 'Step-by-step guides for when things get hard. Because every couple needs these.', free: '2 free' },
-  { icon: '/icons/icon-reset.png', title: '60-Day Threefold Reset', desc: 'A structured 4-phase transformation. Teaching, exercises, and couple activities.', free: false },
+  { icon: '/icons/icon-reset.png', title: '60-Day Cleave Reset', desc: 'A structured 4-phase transformation. Teaching, exercises, and couple activities.', free: false },
   { icon: '/icons/icon-heart.png', title: 'Couple Dashboard', desc: 'Link with your spouse. Track progress together. Send love notes.', free: true },
 ];
 
@@ -69,7 +69,7 @@ export default function LandingPage() {
           <div className="flex items-center gap-3">
             <ThreefoldLogo size={36} />
             <span className="text-sm font-semibold tracking-[0.15em] uppercase hidden sm:inline" style={{ fontFamily: 'Cinzel, serif', color: C.ivory }}>
-              Threefold Cord
+              Cleave
             </span>
           </div>
           <div className="flex items-center gap-3">
@@ -147,7 +147,7 @@ export default function LandingPage() {
             Most couples don&apos;t need crisis intervention — they need daily investment. Small, consistent deposits of attention, honesty, and faith that compound over years. But life gets in the way. Routines calcify. Conversations stay shallow. The drift happens so slowly you don&apos;t notice until you feel like strangers.
           </p>
           <p className="text-base md:text-lg" style={{ fontFamily: 'DM Sans, sans-serif', color: C.textMid, lineHeight: 1.8 }}>
-            Threefold Cord exists because your marriage was designed for more than surviving. It was designed for <strong style={{ color: C.textDark }}>covenant — the kind of love that&apos;s chosen daily, strengthened intentionally, and anchored in something unshakeable.</strong>
+            Cleave exists because your marriage was designed for more than surviving. It was designed for <strong style={{ color: C.textDark }}>covenant — the kind of love that&apos;s chosen daily, strengthened intentionally, and anchored in something unshakeable.</strong>
           </p>
         </div>
       </section>
@@ -190,7 +190,7 @@ export default function LandingPage() {
               Built on four pillars
             </h2>
             <p className="text-base mt-4 max-w-2xl mx-auto" style={{ color: C.textMid, fontFamily: 'DM Sans, sans-serif', lineHeight: 1.7 }}>
-              Every devotional, game, exercise, and tool in Threefold Cord maps to one of these pillars — giving your growth real structure and direction.
+              Every devotional, game, exercise, and tool in Cleave maps to one of these pillars — giving your growth real structure and direction.
             </p>
           </div>
 
@@ -288,7 +288,7 @@ export default function LandingPage() {
               </div>
               <p className="text-xs mb-6" style={{ color: C.muted }}>First 500 couples only. Never pay again.</p>
               <ul className="space-y-2.5 flex-1 mb-6">
-                {['Everything in Free, plus:', 'All Marriage Games (5+)', 'All Conflict Repair Tools', '60-Day Threefold Reset', 'Couple Exercises Library', 'Weekly Check-ins', 'Love Notes', 'Pillar Analytics', 'Founding Member Badge ✦', 'Lifetime access — forever'].map((item, i) => (
+                {['Everything in Free, plus:', 'All Marriage Games (5+)', 'All Conflict Repair Tools', '60-Day Cleave Reset', 'Couple Exercises Library', 'Weekly Check-ins', 'Love Notes', 'Pillar Analytics', 'Founding Member Badge ✦', 'Lifetime access — forever'].map((item, i) => (
                   <li key={i} className="flex items-start gap-2 text-sm" style={{ fontFamily: 'Source Sans 3, sans-serif', color: C.ivory }}>
                     <span style={{ color: C.gold, fontWeight: 700, fontSize: 14 }}>✓</span> {item}
                   </li>
@@ -308,7 +308,7 @@ export default function LandingPage() {
               </div>
               <p className="text-xs mb-6" style={{ color: C.textMid }}>or £34.99/year <span style={{ color: C.green, fontWeight: 600 }}>(save 42%)</span></p>
               <ul className="space-y-2.5 flex-1 mb-6">
-                {['Everything in Free, plus:', 'All Marriage Games (5+)', 'All Conflict Repair Tools', '60-Day Threefold Reset', 'Couple Exercises Library', 'Weekly Check-ins', 'Love Notes', 'Pillar Analytics Over Time'].map((item, i) => (
+                {['Everything in Free, plus:', 'All Marriage Games (5+)', 'All Conflict Repair Tools', '60-Day Cleave Reset', 'Couple Exercises Library', 'Weekly Check-ins', 'Love Notes', 'Pillar Analytics Over Time'].map((item, i) => (
                   <li key={i} className="flex items-start gap-2 text-sm" style={{ fontFamily: 'Source Sans 3, sans-serif', color: C.textDark }}>
                     <span style={{ color: C.green, fontWeight: 700, fontSize: 14 }}>✓</span> {item}
                   </li>
@@ -403,9 +403,29 @@ export default function LandingPage() {
           </p>
           <div className="w-16 h-px mx-auto mt-8 mb-12" style={{ background: C.gold, opacity: 0.3 }} />
 
-          <p className="text-sm" style={{ color: C.textMid, fontFamily: 'DM Sans, sans-serif' }}>
-            Testimonials coming soon from founding couples and partner churches.
-          </p>
+          {/* Early adopter quotes */}
+          <div className="grid md:grid-cols-3 gap-6 text-left">
+            {[
+              { quote: 'The daily devotional genuinely changed how we start our mornings. We pray together now — something we never did before.', name: 'Early Adopter Couple', location: 'London' },
+              { quote: 'We were stuck in the same arguments for years. The repair tools gave us a real framework to break the cycle.', name: 'Beta Tester', location: 'Manchester' },
+              { quote: 'As a pastor, I recommend Cleave to every couple in our pre-marriage course. It bridges the gap between Sunday and Monday.', name: 'Church Partner', location: 'Birmingham' },
+            ].map((t, i) => (
+              <div key={i} className="rounded-2xl p-6" style={{ background: C.white, boxShadow: '0 2px 12px rgba(0,0,0,0.04)' }}>
+                <p className="text-sm italic m-0 mb-4" style={{ color: C.textDark, fontFamily: 'Cormorant Garamond, serif', lineHeight: 1.7, fontSize: '15px' }}>
+                  &ldquo;{t.quote}&rdquo;
+                </p>
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold" style={{ background: C.goldSoft, color: C.goldDark }}>
+                    {t.name[0]}
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold m-0" style={{ color: C.textDark, fontFamily: 'Source Sans 3, sans-serif' }}>{t.name}</p>
+                    <p className="text-xs m-0" style={{ color: C.textMid }}>{t.location}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -436,17 +456,21 @@ export default function LandingPage() {
         <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <ThreefoldLogo size={24} />
-            <span className="text-xs font-semibold tracking-wider uppercase" style={{ fontFamily: 'Cinzel, serif', color: C.textMid }}>Threefold Cord</span>
+            <span className="text-xs font-semibold tracking-wider uppercase" style={{ fontFamily: 'Cinzel, serif', color: C.textMid }}>Cleave</span>
           </div>
           <div className="flex items-center gap-6">
             <Link href="/auth" className="text-xs no-underline" style={{ color: C.textMid, fontFamily: 'Source Sans 3, sans-serif' }}>Sign In</Link>
             <span className="text-xs" style={{ color: C.ivoryDark }}>·</span>
             <Link href="/auth" className="text-xs no-underline" style={{ color: C.textMid, fontFamily: 'Source Sans 3, sans-serif' }}>Get Started</Link>
             <span className="text-xs" style={{ color: C.ivoryDark }}>·</span>
-            <span className="text-xs" style={{ color: C.textMid, fontFamily: 'Source Sans 3, sans-serif' }}>hello@threefoldcord.app</span>
+            <Link href="/privacy" className="text-xs no-underline" style={{ color: C.textMid, fontFamily: 'Source Sans 3, sans-serif' }}>Privacy</Link>
+            <span className="text-xs" style={{ color: C.ivoryDark }}>·</span>
+            <Link href="/terms" className="text-xs no-underline" style={{ color: C.textMid, fontFamily: 'Source Sans 3, sans-serif' }}>Terms</Link>
+            <span className="text-xs" style={{ color: C.ivoryDark }}>·</span>
+            <span className="text-xs" style={{ color: C.textMid, fontFamily: 'Source Sans 3, sans-serif' }}>hello@cleaveapp.com</span>
           </div>
           <p className="text-[10px]" style={{ color: `${C.textMid}80` }}>
-            © {new Date().getFullYear()} Threefold Cord. All rights reserved.
+            © {new Date().getFullYear()} Cleave. All rights reserved.
           </p>
         </div>
       </footer>

@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, useCallback, useMemo, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase-browser';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { useTheme } from '@/lib/theme';
@@ -71,6 +71,14 @@ const TIER: Record<string,{label:string;color:string;icon:string}> = {
 
 /* ═══════════════════════════════════════ PAGE ═══════════════════════════════════════ */
 export default function ProfilePage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen" style={{ background: V.bgPrimary }} />}>
+      <ProfileContent />
+    </Suspense>
+  );
+}
+
+function ProfileContent() {
   const [profile,setProfile]=useState<Profile|null>(null);
   const [partner,setPartner]=useState<Partner|null>(null);
   const [couple,setCouple]=useState<CoupleInfo|null>(null);
@@ -88,9 +96,13 @@ export default function ProfilePage() {
   const [form,setForm]=useState({first_name:'',last_name:'',gender:'',date_of_birth:''});
   const [signOutOpen,setSignOutOpen]=useState(false);
   const [showAllMs,setShowAllMs]=useState(false);
+  const [subscription,setSubscription]=useState<{plan_type:string;status:string;cancel_at_period_end:boolean;current_period_end:string|null}|null>(null);
+  const [billingLoading,setBillingLoading]=useState(false);
+  const [checkoutStatus,setCheckoutStatus]=useState<'success'|'cancel'|null>(null);
 
   const supabase=createClient();
   const router=useRouter();
+  const searchParams=useSearchParams();
 
   const load=useCallback(async()=>{
     const {data:{user}}=await supabase.auth.getUser();
@@ -100,7 +112,7 @@ export default function ProfilePage() {
     setProfile(p);
     setForm({first_name:p.first_name||'',last_name:p.last_name||'',gender:p.gender||'',date_of_birth:p.date_of_birth||''});
 
-    const [ptr,cp,ass,aAll,ms,dc,ac,comps,amb]=await Promise.all([
+    const [ptr,cp,ass,aAll,ms,dc,ac,comps,amb,sub]=await Promise.all([
       p.partner_id?supabase.from('profiles').select('id,first_name,last_name,streak_count,last_active_at').eq('id',p.partner_id).maybeSingle():{data:null},
       p.couple_id?supabase.from('couples').select('id,tier,wedding_date,years_married,status,reset_started_at,reset_completed_at,reset_phase').eq('id',p.couple_id).maybeSingle():{data:null},
       supabase.from('assessments').select('*').eq('profile_id',user.id).eq('status','completed').order('completed_at',{ascending:false}).limit(1).maybeSingle(),
@@ -110,6 +122,7 @@ export default function ProfilePage() {
       supabase.from('assessments').select('*',{count:'exact',head:true}).eq('profile_id',user.id).eq('status','completed'),
       supabase.from('devotional_completions').select('read_at').eq('profile_id',user.id).order('read_at',{ascending:false}).limit(90),
       supabase.from('church_ambassadors').select('id,role,churches(name)').eq('profile_id',user.id).limit(1).maybeSingle(),
+      supabase.from('subscriptions').select('plan_type,status,cancel_at_period_end,current_period_end').eq('profile_id',user.id).eq('status','active').order('created_at',{ascending:false}).limit(1).maybeSingle(),
     ]);
     if(ptr.data)setPartner(ptr.data as Partner);
     if(cp.data)setCouple(cp.data as CoupleInfo);
@@ -120,11 +133,17 @@ export default function ProfilePage() {
     setAssessmentCount(ac.count||0);
     if(comps.data)setCompletionDates((comps.data as {read_at:string}[]).map(d=>d.read_at.split('T')[0]));
     if(amb.data)setAmbassador(amb.data as unknown as ChurchAmb);
+    if(sub.data)setSubscription(sub.data as any);
     setLoading(false);
   },[]);
 
   useEffect(()=>{load();},[load]);
   useEffect(()=>{if(!loading)requestAnimationFrame(()=>setTimeout(()=>setVis(true),60));},[loading]);
+  useEffect(()=>{
+    const status=searchParams?.get('checkout');
+    if(status==='success')setCheckoutStatus('success');
+    else if(status==='cancel')setCheckoutStatus('cancel');
+  },[searchParams]);
 
   async function saveProfile(){
     if(!profile)return; setSaving(true);
@@ -240,6 +259,27 @@ export default function ProfilePage() {
           <StatGem icon="📋" value={assessmentCount} label="Assessed"/>
           <StatGem icon="🏆" value={milestones.length} label="Earned"/>
         </section>
+
+        {/* ══════════ CHECKOUT STATUS ══════════ */}
+        {checkoutStatus==='success'&&(
+          <div className="rounded-2xl p-4 mb-6 flex items-center gap-3" style={{background:V.greenBg,border:`1.5px solid ${V.green}30`}}>
+            <span className="text-xl">🎉</span>
+            <div className="flex-1">
+              <div className="text-sm font-semibold" style={{color:V.textPrimary}}>Welcome to Covenant Plus!</div>
+              <div className="text-xs" style={{color:V.textMuted}}>Your premium features are now unlocked.</div>
+            </div>
+            <button onClick={()=>setCheckoutStatus(null)} className="text-xs border-none bg-transparent cursor-pointer" style={{color:V.textMuted}}>{'\u2715'}</button>
+          </div>
+        )}
+        {checkoutStatus==='cancel'&&(
+          <div className="rounded-2xl p-4 mb-6 flex items-center gap-3" style={{background:V.bgCard,border:`1px solid ${V.border}`}}>
+            <span className="text-lg">💭</span>
+            <div className="flex-1">
+              <div className="text-sm" style={{color:V.textMuted}}>Checkout was cancelled. No worries — upgrade anytime.</div>
+            </div>
+            <button onClick={()=>setCheckoutStatus(null)} className="text-xs border-none bg-transparent cursor-pointer" style={{color:V.textMuted}}>{'\u2715'}</button>
+          </div>
+        )}
 
         {/* ══════════ FOUR PILLARS ══════════ */}
         {assessment&&(
@@ -454,6 +494,64 @@ export default function ProfilePage() {
             <ThemeToggle size="sm" />
           </div>
           <NotificationSettings />
+        </Sect>
+
+        {/* ══════════ PLAN ══════════ */}
+        <Sect delay={0.84} v={vis}>
+          <div className="flex items-center justify-between mb-4">
+            <STitle>Your Plan</STitle>
+            {subscription&&subscription.plan_type!=='free'&&(
+              <span className="text-xs font-semibold px-2.5 py-1 rounded-full" style={{background:V.goldBg,color:V.textLink}}>
+                {subscription.plan_type==='founding'?'Founding Member ✦':subscription.plan_type==='plus_yearly'?'Plus (Yearly)':'Plus (Monthly)'}
+              </span>
+            )}
+          </div>
+          {(!subscription||subscription.plan_type==='free')?(
+            <>
+              <div className="flex items-center gap-3 p-4 rounded-xl mb-3" style={{background:V.bgWarm,border:`1px solid ${V.border}`}}>
+                <span className="text-2xl">🆓</span>
+                <div>
+                  <div className="text-sm font-semibold" style={{color:V.textPrimary}}>Covenant Preview</div>
+                  <div className="text-xs" style={{color:V.textMuted}}>Free forever — devotionals, streaks, assessment</div>
+                </div>
+              </div>
+              <button
+                onClick={async()=>{setBillingLoading(true);try{const r=await fetch('/api/stripe/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({plan:'plus_yearly'})});const d=await r.json();if(d.url)window.location.href=d.url;}catch{}finally{setBillingLoading(false);}}}
+                disabled={billingLoading}
+                className="w-full py-3 rounded-xl text-sm font-semibold text-white border-none cursor-pointer"
+                style={{fontFamily:'Source Sans 3,sans-serif',background:'linear-gradient(135deg,#B8860B,#8B6914)',opacity:billingLoading?0.7:1}}
+              >
+                {billingLoading?'Loading...':'Upgrade to Covenant Plus — £34.99/yr'}
+              </button>
+            </>
+          ):(
+            <>
+              <div className="flex items-center gap-3 p-4 rounded-xl mb-3" style={{background:V.bgWarm,border:`1px solid ${V.border}`}}>
+                <span className="text-2xl">{subscription.plan_type==='founding'?'✦':'⭐'}</span>
+                <div>
+                  <div className="text-sm font-semibold" style={{color:V.textPrimary}}>
+                    {subscription.plan_type==='founding'?'Founding Member':'Covenant Plus'}
+                  </div>
+                  <div className="text-xs" style={{color:V.textMuted}}>
+                    {subscription.plan_type==='founding'?'Lifetime access — thank you!'
+                      :subscription.cancel_at_period_end?`Cancels ${subscription.current_period_end?new Date(subscription.current_period_end).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):''}`
+                      :subscription.current_period_end?`Renews ${new Date(subscription.current_period_end).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}`
+                      :'Active'}
+                  </div>
+                </div>
+              </div>
+              {subscription.plan_type!=='founding'&&(
+                <button
+                  onClick={async()=>{setBillingLoading(true);try{const r=await fetch('/api/stripe/portal',{method:'POST'});const d=await r.json();if(d.url)window.location.href=d.url;}catch{}finally{setBillingLoading(false);}}}
+                  disabled={billingLoading}
+                  className="w-full py-2.5 rounded-xl text-xs font-semibold border cursor-pointer"
+                  style={{background:'transparent',borderColor:V.border,color:V.textSecondary,fontFamily:'Source Sans 3,sans-serif',opacity:billingLoading?0.7:1}}
+                >
+                  {billingLoading?'Loading...':'Manage Billing'}
+                </button>
+              )}
+            </>
+          )}
         </Sect>
 
         {/* ══════════ QUICK LINKS ══════════ */}

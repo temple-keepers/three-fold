@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase-browser';
-import { ThreefoldLogo } from '@/components/ui/Logo';
+import { CleaveLogo } from '@/components/ui/Logo';
 import { WelcomeStep } from '@/components/onboarding/WelcomeStep';
 import { AboutYouStep } from '@/components/onboarding/AboutYouStep';
 import { YourMarriageStep } from '@/components/onboarding/YourMarriageStep';
@@ -52,6 +52,43 @@ export default function OnboardingPage() {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
+
+      // ── Check for a pending spouse invitation for this user's email ──
+      const { data: pendingInvite } = await supabase
+        .from('spouse_invitations')
+        .select('invite_token')
+        .eq('invitee_email', user.email!)
+        .eq('status', 'pending')
+        .gt('expires_at', new Date().toISOString())
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (pendingInvite) {
+        // Accept the invitation — the RPC links profiles, couples, partner_ids
+        const { data: result } = await supabase.rpc('accept_spouse_invitation', {
+          p_token: pendingInvite.invite_token,
+          p_accepter_id: user.id,
+        });
+
+        if (result?.success) {
+          // RPC handled couple linking — just update personal profile fields
+          await supabase.from('profiles').update({
+            first_name: data.firstName,
+            last_name: data.lastName,
+            gender: data.gender,
+            onboarding_completed: true,
+            onboarding_step: STEP_COUNT,
+          }).eq('id', user.id);
+
+          router.push('/dashboard');
+          return;
+        }
+        // If RPC failed (e.g. token expired between check and call), fall through
+        // to normal couple creation below
+      }
+
+      // ── No pending invitation — create a new couple ──
 
       // Update profile
       await supabase.from('profiles').update({
@@ -133,9 +170,9 @@ export default function OnboardingPage() {
               ← Back
             </button>
             <div className="flex items-center gap-2">
-              <ThreefoldLogo size={24} />
+              <CleaveLogo size={24} />
               <span className="text-sm" style={{ fontFamily: 'Cormorant Garamond, serif', color: '#A69D90' }}>
-                Threefold Cord
+                Cleave
               </span>
             </div>
             <div className="w-10" />

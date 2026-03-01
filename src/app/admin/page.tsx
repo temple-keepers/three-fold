@@ -164,7 +164,7 @@ function OverviewTab({ stats, loading }: { stats: Stats | null; loading: boolean
           Welcome to the Admin Console
         </h1>
         <p className="text-sm" style={{ color: '#8A9BAA', fontFamily: 'DM Sans, sans-serif' }}>
-          Manage all Threefold Cord content, users, and churches from here.
+          Manage all Cleave content, users, and churches from here.
         </p>
       </div>
 

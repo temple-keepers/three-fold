@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase-browser';
-import { ThreefoldLogo } from '@/components/ui/Logo';
+import { CleaveLogo } from '@/components/ui/Logo';
 import { t } from '@/lib/tokens';
 
 type PageState = 'loading' | 'show_invite' | 'needs_signup' | 'accepting' | 'accepted' | 'error';
@@ -159,10 +159,10 @@ export default function InvitePage() {
         {/* Logo */}
         <div className="text-center mb-6">
           <div className="mx-auto mb-3" style={{ width: 56 }}>
-            <ThreefoldLogo size={56} />
+            <CleaveLogo size={56} />
           </div>
           <h1 className="text-2xl font-bold tracking-[0.12em] uppercase m-0" style={{ fontFamily: 'Cinzel, serif', color: t.textPrimary }}>
-            Threefold Cord
+            Cleave
           </h1>
         </div>
 
@@ -198,7 +198,7 @@ export default function InvitePage() {
                   {invite.inviterName} invited you
                 </h2>
                 <p className="text-sm m-0" style={{ color: t.textMuted, lineHeight: 1.6 }}>
-                  Create your account to join them on Threefold Cord
+                  Create your account to join them on Cleave
                 </p>
               </div>
 
@@ -303,7 +303,7 @@ export default function InvitePage() {
                 Join {invite.inviterName}
               </h2>
               <p className="text-sm mb-6" style={{ color: t.textMuted, lineHeight: 1.6 }}>
-                {invite.inviterName} wants to strengthen your marriage together on Threefold Cord. Accept to link your accounts and unlock the couple dashboard.
+                {invite.inviterName} wants to strengthen your marriage together on Cleave. Accept to link your accounts and unlock the couple dashboard.
               </p>
 
               {invite.personalMessage && (

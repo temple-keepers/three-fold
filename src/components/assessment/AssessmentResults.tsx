@@ -25,7 +25,7 @@ const TIER_CONFIG = {
     color: '#5B8A3C',
     bgToken: t.greenBg,
     borderColor: '#5B8A3C30',
-    message: 'Your marriage has a strong foundation. Threefold Cord will help you build on what\'s working and deepen your connection even further.',
+    message: 'Your marriage has a strong foundation. Cleave will help you build on what\'s working and deepen your connection even further.',
   },
   repair: {
     title: 'Repair',

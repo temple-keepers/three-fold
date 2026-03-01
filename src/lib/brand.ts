@@ -1,5 +1,5 @@
 /**
- * Threefold Cord — 2026 Brand Tokens
+ * Cleave — 2026 Brand Tokens
  * 
  * Source: Brand Board (brand-board.png)
  * All colour, font, and shadow values in one place.

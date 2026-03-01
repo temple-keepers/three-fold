@@ -20,6 +20,12 @@ const NAV_ITEMS: NavItem[] = [
     matchPaths: ['/dashboard'],
   },
   {
+    href: '/together',
+    label: 'Together',
+    icon: '/icons/icon-heart.png',
+    matchPaths: ['/together'],
+  },
+  {
     href: '/devotional',
     label: 'Devotional',
     icon: '/icons/icon-book.png',
@@ -32,16 +38,10 @@ const NAV_ITEMS: NavItem[] = [
     matchPaths: ['/games'],
   },
   {
-    href: '/emergency',
-    label: 'Tools',
-    icon: '/icons/icon-tools.png',
-    matchPaths: ['/emergency'],
-  },
-  {
     href: '/profile',
     label: 'Profile',
     icon: '/icons/icon-star.png',
-    matchPaths: ['/profile', '/couple', '/church'],
+    matchPaths: ['/profile', '/couple', '/church', '/emergency', '/journal'],
   },
 ];
 
@@ -51,6 +51,8 @@ const HIDDEN_PATHS = [
   '/onboarding',
   '/assessment',
   '/admin',
+  '/privacy',
+  '/terms',
   '/',           // landing page
 ];
 

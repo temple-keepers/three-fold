@@ -6,6 +6,8 @@ import { createClient } from '@/lib/supabase-browser';
 import { ThreefoldLogo } from '@/components/ui/Logo';
 import { TopBar } from '@/components/ui/TopBar';
 import { t } from '@/lib/tokens';
+import { useSubscription } from '@/lib/useSubscription';
+import { UpgradePrompt } from '@/components/ui/UpgradePrompt';
 
 const PHASE_CONFIG = [
   { number: 1, icon: '⚓', color: t.pillarSafetyText, bg: t.pillarSafetyBg, label: 'Stabilise' },
@@ -38,6 +40,7 @@ export default function ResetPage() {
 
   const supabase = createClient();
   const router = useRouter();
+  const { isPremium, loading: subLoading } = useSubscription();
 
   useEffect(() => { loadReset(); }, []);
   useEffect(() => { if (!loading) setTimeout(() => setVisible(true), 100); }, [loading]);
@@ -123,12 +126,16 @@ export default function ResetPage() {
     }
   }
 
-  if (loading) {
+  if (loading || subLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: t.bgPrimary }}>
         <ThreefoldLogo size={48} />
       </div>
     );
+  }
+
+  if (!isPremium) {
+    return <UpgradePrompt feature="60-Day Cleave Reset" />;
   }
 
   const completedDays = new Set(completions.map(c => c.day_number));
@@ -138,7 +145,7 @@ export default function ResetPage() {
     <div className="min-h-screen px-4 py-6" style={{ background: t.bgPrimary }}>
       <div className="max-w-2xl mx-auto" style={{ opacity: visible ? 1 : 0, transform: visible ? 'translateY(0)' : 'translateY(12px)', transition: 'all 0.6s ease' }}>
         <TopBar
-          title="60-Day Threefold Reset"
+          title="60-Day Cleave Reset"
           subtitle={enrolment ? `Day ${currentDay} of 60` : 'Your structured pathway to transformation'}
           backHref="/dashboard"
           trailing={enrolment ? (

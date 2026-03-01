@@ -5,7 +5,9 @@ import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase-browser';
 import { ThreefoldLogo } from '@/components/ui/Logo';
 import { TopBar } from '@/components/ui/TopBar';
+import { ShareMilestone } from '@/components/ui/ShareMilestone';
 import { t } from '@/lib/tokens';
+import Link from 'next/link';
 
 const PILLAR_MAP: Record<string, { bg: string; text: string; label: string; icon: string }> = {
   covenant: { bg: t.pillarCovenantBg, text: t.pillarCovenantText, label: 'Covenant Commitment', icon: '🤝' },
@@ -25,6 +27,15 @@ interface Devotional {
   micro_action: string;
   prayer_prompt: string | null;
   couple_question: string | null;
+  word_study_term: string | null;
+  word_study_meaning: string | null;
+}
+
+function getBibleGatewayUrl(ref: string): string {
+  const parts = ref.split(':');
+  const bookAndChapter = parts[0].trim();
+  const encoded = encodeURIComponent(bookAndChapter);
+  return `https://www.biblegateway.com/passage/?search=${encoded}&version=NIV`;
 }
 
 export default function DevotionalPage() {
@@ -37,7 +48,10 @@ export default function DevotionalPage() {
   const [streak, setStreak] = useState(0);
   const [milestones, setMilestones] = useState<any[]>([]);
   const [showCelebration, setShowCelebration] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [userName, setUserName] = useState<string>('');
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [visible, setVisible] = useState(false);
   const [weakestPillar, setWeakestPillar] = useState<string | null>(null);
@@ -50,19 +64,22 @@ export default function DevotionalPage() {
   useEffect(() => { if (!loading) setTimeout(() => setVisible(true), 100); }, [loading]);
 
   async function loadDevotional(dayOverride?: number) {
+    setError(null);
+    try {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { router.push('/auth'); return; }
 
     // Get profile with current_devotional_day
     const { data: profile } = await supabase
       .from('profiles')
-      .select('current_devotional_day, streak_count')
+      .select('current_devotional_day, streak_count, first_name')
       .eq('id', user.id)
       .single();
 
     const day = dayOverride || profile?.current_devotional_day || 1;
     setCurrentDay(day);
     setStreak(profile?.streak_count || 0);
+    if (profile?.first_name) setUserName(profile.first_name);
 
     // Get total available days
     const { count } = await supabase
@@ -95,7 +112,7 @@ export default function DevotionalPage() {
     // Get devotional for this day
     const { data: dev } = await supabase
       .from('devotionals')
-      .select('id, day_number, title, pillar, scripture_text, scripture_reference, reflection, micro_action, prayer_prompt, couple_question')
+      .select('id, day_number, title, pillar, scripture_text, scripture_reference, reflection, micro_action, prayer_prompt, couple_question, word_study_term, word_study_meaning')
       .eq('day_number', day)
       .eq('is_active', true)
       .single();
@@ -125,49 +142,80 @@ export default function DevotionalPage() {
     }
 
     setLoading(false);
+    } catch (err) {
+      console.error('Failed to load devotional:', err);
+      setError('Failed to load your devotional. Please check your connection and try again.');
+      setLoading(false);
+    }
   }
 
   async function markComplete() {
     if (!devotional || completed) return;
     setSaving(true);
 
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { setSaving(false); return; }
 
-    // Save completion
-    await supabase.from('devotional_completions').insert({
-      profile_id: user.id,
-      devotional_id: devotional.id,
-    });
+      // Save completion
+      const { error: insertErr } = await supabase.from('devotional_completions').upsert({
+        profile_id: user.id,
+        devotional_id: devotional.id,
+      }, { onConflict: 'profile_id,devotional_id' });
 
-    // Advance current_devotional_day
-    const nextDay = currentDay + 1;
-    await supabase
-      .from('profiles')
-      .update({ current_devotional_day: nextDay })
-      .eq('id', user.id);
+      if (insertErr) {
+        console.error('Completion insert error:', insertErr);
+        alert('Something went wrong saving your completion. Please try again.');
+        setSaving(false);
+        return;
+      }
 
-    setCompleted(true);
+      // Advance current_devotional_day
+      const nextDay = currentDay + 1;
+      const { error: updateErr } = await supabase
+        .from('profiles')
+        .update({ current_devotional_day: nextDay })
+        .eq('id', user.id);
 
-    // Check milestones
-    const { data: newMilestones } = await supabase.rpc('check_milestones', {
-      p_profile_id: user.id,
-    });
+      if (updateErr) {
+        console.error('Profile update error:', updateErr);
+      }
 
-    if (newMilestones && newMilestones.length > 0) {
-      setMilestones(newMilestones);
-      setShowCelebration(true);
+      setCompleted(true);
+
+      // Check milestones
+      try {
+        const { data: newMilestones } = await supabase.rpc('check_milestones', {
+          p_profile_id: user.id,
+        });
+        if (newMilestones && newMilestones.length > 0) {
+          setMilestones(newMilestones);
+          setShowCelebration(true);
+        }
+      } catch (e) { console.error('Milestone check error:', e); }
+
+      // Refresh streak (the trigger should have updated it)
+      const { data: updatedProfile } = await supabase
+        .from('profiles')
+        .select('streak_count')
+        .eq('id', user.id)
+        .single();
+      setStreak(updatedProfile?.streak_count || 0);
+
+      // Nudge partner that you completed today's devotional
+      try {
+        fetch('/api/nudge', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ type: 'devotional' }),
+        });
+      } catch { /* non-critical */ }
+    } catch (e) {
+      console.error('markComplete error:', e);
+      alert('Something went wrong. Please try again.');
+    } finally {
+      setSaving(false);
     }
-
-    // Refresh streak
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('streak_count')
-      .eq('id', user.id)
-      .single();
-    setStreak(profile?.streak_count || 0);
-
-    setSaving(false);
   }
 
   async function goToDay(day: number) {
@@ -208,6 +256,29 @@ export default function DevotionalPage() {
           <p className="mt-4 text-sm" style={{ color: t.textMuted, fontFamily: 'Source Sans 3, sans-serif' }}>
             Loading your devotional...
           </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-4" style={{ background: t.bgPrimary }}>
+        <div className="text-center max-w-sm">
+          <div className="text-4xl mb-4">⚠️</div>
+          <h2 className="text-xl font-medium mb-2 m-0" style={{ fontFamily: 'Cormorant Garamond, serif', color: t.textPrimary }}>
+            Connection Issue
+          </h2>
+          <p className="text-sm mb-6 m-0" style={{ fontFamily: 'Source Sans 3, sans-serif', color: t.textMuted, lineHeight: 1.6 }}>
+            {error}
+          </p>
+          <button
+            onClick={() => { setLoading(true); loadDevotional(); }}
+            className="px-6 py-3 rounded-2xl text-sm font-semibold text-white border-none cursor-pointer"
+            style={{ fontFamily: 'Source Sans 3, sans-serif', background: 'linear-gradient(135deg, #B8860B, #8B6914)' }}
+          >
+            Try Again
+          </button>
         </div>
       </div>
     );
@@ -326,6 +397,44 @@ export default function DevotionalPage() {
               — {devotional.scripture_reference}
             </p>
           </div>
+
+          {/* Word Study */}
+          {devotional.word_study_term && devotional.word_study_meaning && (
+            <div className="rounded-2xl p-6 mb-6" style={{ background: t.bgCard, boxShadow: t.shadowCard }}>
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-lg">📖</span>
+                <h2 className="text-sm font-semibold uppercase tracking-wider m-0" style={{ color: t.textSecondary, fontFamily: 'Source Sans 3, sans-serif' }}>
+                  Word Study
+                </h2>
+              </div>
+              <div className="rounded-xl p-4 mb-3" style={{ background: t.bgAccent }}>
+                <span className="text-base font-bold" style={{ fontFamily: 'Cormorant Garamond, serif', color: t.textPrimary }}>
+                  &ldquo;{devotional.word_study_term}&rdquo;
+                </span>
+              </div>
+              <p className="text-sm m-0" style={{ fontFamily: 'Source Sans 3, sans-serif', color: t.textPrimary, lineHeight: 1.8 }}>
+                {devotional.word_study_meaning}
+              </p>
+            </div>
+          )}
+
+          {/* Read Full Chapter link */}
+          <a
+            href={getBibleGatewayUrl(devotional.scripture_reference)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-between rounded-2xl p-4 mb-6 no-underline transition-all hover:-translate-y-0.5"
+            style={{ background: t.bgCard, boxShadow: t.shadowCard, border: `1.5px solid ${t.border}` }}
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center text-lg" style={{ background: t.pillarSpiritualBg }}>📜</div>
+              <div>
+                <div className="text-sm font-semibold" style={{ color: t.textPrimary, fontFamily: 'Source Sans 3, sans-serif' }}>Read Full Chapter</div>
+                <div className="text-xs" style={{ color: t.textMuted }}>{devotional.scripture_reference} on Bible Gateway · includes original language tools</div>
+              </div>
+            </div>
+            <span className="text-sm flex-shrink-0" style={{ color: t.textLink }}>↗</span>
+          </a>
 
           {/* Personalized insight when this day matches weakest pillar */}
           {weakestPillar && devotional.pillar === weakestPillar && pillarScore !== null && pillarScore < 3.5 && (
@@ -451,9 +560,41 @@ export default function DevotionalPage() {
                 {saving ? 'Saving...' : `Complete Day ${currentDay} ✓`}
               </button>
             ) : (
-              <div className="w-full py-4 rounded-2xl text-center text-base font-semibold" style={{ background: t.greenBg, color: t.green, border: `1.5px solid ${t.green}30` }}>
-                ✓ Day {currentDay} Complete
-              </div>
+              <>
+                <div className="w-full py-4 rounded-2xl text-center text-base font-semibold" style={{ background: t.greenBg, color: t.green, border: `1.5px solid ${t.green}30` }}>
+                  ✓ Day {currentDay} Complete
+                </div>
+                {/* What's Next flow */}
+                <div className="rounded-2xl p-5 mt-3" style={{ background: t.bgCard, boxShadow: t.shadowCard }}>
+                  <div className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: t.textSecondary, fontFamily: 'Source Sans 3, sans-serif' }}>What&apos;s next?</div>
+                  <div className="space-y-2">
+                    <Link href="/together" className="flex items-center gap-3 p-3 rounded-xl no-underline transition-all hover:-translate-y-0.5" style={{ background: t.bgCardHover }}>
+                      <span className="text-base">💬</span>
+                      <div className="flex-1">
+                        <div className="text-sm font-semibold" style={{ color: t.textPrimary, fontFamily: 'Source Sans 3, sans-serif' }}>Answer today&apos;s couple question</div>
+                        <div className="text-xs" style={{ color: t.textMuted }}>Both answer privately, then reveal together</div>
+                      </div>
+                      <span style={{ color: t.textLink }}>→</span>
+                    </Link>
+                    <Link href="/games" className="flex items-center gap-3 p-3 rounded-xl no-underline transition-all hover:-translate-y-0.5" style={{ background: t.bgCardHover }}>
+                      <span className="text-base">🎲</span>
+                      <div className="flex-1">
+                        <div className="text-sm font-semibold" style={{ color: t.textPrimary, fontFamily: 'Source Sans 3, sans-serif' }}>Play a marriage game</div>
+                        <div className="text-xs" style={{ color: t.textMuted }}>Fun prompts for you and your spouse</div>
+                      </div>
+                      <span style={{ color: t.textLink }}>→</span>
+                    </Link>
+                    <Link href="/journal" className="flex items-center gap-3 p-3 rounded-xl no-underline transition-all hover:-translate-y-0.5" style={{ background: t.bgCardHover }}>
+                      <span className="text-base">📔</span>
+                      <div className="flex-1">
+                        <div className="text-sm font-semibold" style={{ color: t.textPrimary, fontFamily: 'Source Sans 3, sans-serif' }}>Write in your journal</div>
+                        <div className="text-xs" style={{ color: t.textMuted }}>Capture what God showed you today</div>
+                      </div>
+                      <span style={{ color: t.textLink }}>→</span>
+                    </Link>
+                  </div>
+                </div>
+              </>
             )}
 
             {/* Navigation */}
@@ -502,19 +643,48 @@ export default function DevotionalPage() {
               <p className="text-sm mb-6" style={{ fontFamily: 'Source Sans 3, sans-serif', color: t.textSecondary, lineHeight: 1.6 }}>
                 {milestones[0].description}
               </p>
-              <button
-                onClick={() => setShowCelebration(false)}
-                className="px-8 py-3 rounded-full text-sm font-semibold text-white border-none cursor-pointer"
-                style={{
-                  fontFamily: 'Source Sans 3, sans-serif',
-                  background: 'linear-gradient(135deg, #B8860B, #8B6914)',
-                  boxShadow: '0 4px 16px rgba(184,134,11,0.2)',
-                }}
-              >
-                Keep Going 🔥
-              </button>
+              <div className="flex gap-3 justify-center">
+                <button
+                  onClick={() => {
+                    setShowCelebration(false);
+                    setShowShareModal(true);
+                  }}
+                  className="px-6 py-3 rounded-full text-sm font-semibold border cursor-pointer"
+                  style={{
+                    fontFamily: 'Source Sans 3, sans-serif',
+                    background: 'transparent',
+                    borderColor: t.textLink,
+                    color: t.textLink,
+                  }}
+                >
+                  Share
+                </button>
+                <button
+                  onClick={() => setShowCelebration(false)}
+                  className="px-6 py-3 rounded-full text-sm font-semibold text-white border-none cursor-pointer"
+                  style={{
+                    fontFamily: 'Source Sans 3, sans-serif',
+                    background: 'linear-gradient(135deg, #B8860B, #8B6914)',
+                    boxShadow: '0 4px 16px rgba(184,134,11,0.2)',
+                  }}
+                >
+                  Keep Going
+                </button>
+              </div>
             </div>
           </div>
+        )}
+
+        {/* Share milestone modal */}
+        {showShareModal && milestones.length > 0 && (
+          <ShareMilestone
+            type={milestones[0].milestone_type === 'streak' ? 'streak' : 'devotional'}
+            value={milestones[0].milestone_type === 'streak' ? streak : currentDay}
+            title={milestones[0].title}
+            subtitle={milestones[0].description}
+            userName={userName}
+            onClose={() => setShowShareModal(false)}
+          />
         )}
       </div>
     </div>

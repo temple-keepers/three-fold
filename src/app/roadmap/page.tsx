@@ -19,7 +19,7 @@ const ROADMAP: Phase[] = [
       { name: 'Streak & Milestone Tracking', desc: 'Build consistency with daily streaks, activity heatmaps, and milestone badges', icon: '🔥', status: 'live' },
       { name: 'Conflict Repair Tools', desc: 'Emergency toolkit with timeout protocol, active listening, repair conversation, and prayer together', icon: '🛠️', status: 'live' },
       { name: 'Marriage Games', desc: 'Fun connection activities — question cards, date night ideas, appreciation swaps', icon: '🎲', status: 'live' },
-      { name: '60-Day Threefold Reset', desc: '4-phase structured transformation across all pillars with daily teaching, exercises, and reflection', icon: '🔄', status: 'live' },
+      { name: '60-Day Cleave Reset', desc: '4-phase structured transformation across all pillars with daily teaching, exercises, and reflection', icon: '🔄', status: 'live' },
       { name: 'Church Ambassador Dashboard', desc: 'Church leaders see anonymous health trends and can support couples in their congregation', icon: '⛪', status: 'live' },
       { name: 'Push Notifications', desc: 'Morning devotional reminders, streak warnings, and spouse activity alerts', icon: '🔔', status: 'live' },
     ],
@@ -50,7 +50,7 @@ const ROADMAP: Phase[] = [
       { name: 'Church Cohort Pods', desc: 'Optional small groups of 3–5 couples doing the Reset or devotionals together (private by default)', icon: '👥', status: 'planned' },
       { name: 'Mentoring Matching', desc: 'Connect thriving couples with those on the Repair or Restore pathway for encouragement', icon: '🤲', status: 'planned' },
       { name: 'Seasonal Challenges', desc: '7-Day Honour Week, 14-Day Gratitude Challenge, Advent Marriage series, and more', icon: '🏆', status: 'planned' },
-      { name: 'Threefold Renewal Conference', desc: 'Annual virtual or in-person event with workshops, worship, and couple testimonies', icon: '🎪', status: 'planned' },
+      { name: 'Cleave Renewal Conference', desc: 'Annual virtual or in-person event with workshops, worship, and couple testimonies', icon: '🎪', status: 'planned' },
       { name: 'Ambassador Training', desc: 'Certification programme for church marriage champions with resources and a leadership dashboard', icon: '🎓', status: 'planned' },
     ],
   },
@@ -101,7 +101,7 @@ export default function RoadmapPage() {
           <div className="text-4xl mb-3">🗺️</div>
           <h2 className="text-2xl mb-2" style={{ fontFamily: 'Cormorant Garamond,serif', color: t.textPrimary, fontWeight: 600 }}>What&apos;s Coming</h2>
           <p className="text-sm max-w-xs mx-auto" style={{ color: t.textSecondary, lineHeight: 1.6 }}>
-            Threefold Cord is growing with you. Here&apos;s every feature we&apos;re building — and what&apos;s already live.
+            Cleave is growing with you. Here&apos;s every feature we&apos;re building — and what&apos;s already live.
           </p>
           <div className="flex items-center justify-center gap-2 mt-4">
             <div className="h-2 flex-1 max-w-[200px] rounded-full overflow-hidden" style={{ background: t.bgAccent }}>
@@ -166,7 +166,7 @@ export default function RoadmapPage() {
             <div className="text-3xl mb-3">💡</div>
             <h3 className="text-base mb-2" style={{ fontFamily: 'Cormorant Garamond,serif', color: t.textPrimary, fontWeight: 600 }}>Have a suggestion?</h3>
             <p className="text-sm mb-0" style={{ color: t.textSecondary, lineHeight: 1.6 }}>
-              We build Threefold Cord for real marriages. If there&apos;s something you need, we want to hear it.
+              We build Cleave for real marriages. If there&apos;s something you need, we want to hear it.
             </p>
           </div>
         </div>

@@ -99,7 +99,7 @@ self.addEventListener('fetch', (event) => {
 
 // ─── PUSH NOTIFICATIONS ───
 self.addEventListener('push', (event) => {
-  let data = { title: 'Threefold Cord', body: 'You have a new notification', url: '/dashboard' };
+  let data = { title: 'Cleave', body: 'You have a new notification', url: '/dashboard' };
 
   if (event.data) {
     try {

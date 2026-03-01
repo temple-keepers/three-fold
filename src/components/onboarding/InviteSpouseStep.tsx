@@ -13,17 +13,31 @@ interface Props {
 
 export function InviteSpouseStep({ data, setData, onSkip }: Props) {
   return (
-    <StepWrapper title="Invite your spouse" subtitle="This works best together. Send them a personal invitation.">
+    <StepWrapper title="Invite your spouse" subtitle="Cleave is designed for two. Invite them now and unlock the full couple experience.">
+      {/* Why together — compelling visual */}
       <div
-        className="rounded-xl p-5 mb-6"
+        className="rounded-xl p-5 mb-5"
         style={{ background: t.goldBg, border: `1px solid ${t.textLink}20` }}
       >
+        <div className="flex gap-3 mb-3">
+          {[
+            { icon: '🔒', label: 'Private answers' },
+            { icon: '🤝', label: 'Shared dashboard' },
+            { icon: '💬', label: 'Daily questions' },
+          ].map(item => (
+            <div key={item.label} className="flex-1 text-center">
+              <div className="text-lg mb-0.5">{item.icon}</div>
+              <div className="text-[10px] font-medium" style={{ color: t.textSecondary, fontFamily: 'Source Sans 3, sans-serif' }}>
+                {item.label}
+              </div>
+            </div>
+          ))}
+        </div>
         <p
-          className="text-sm m-0"
-          style={{ fontFamily: 'Source Sans 3, sans-serif', color: t.textSecondary, lineHeight: 1.6 }}
+          className="text-xs m-0 text-center"
+          style={{ fontFamily: 'Source Sans 3, sans-serif', color: t.textMuted, lineHeight: 1.5 }}
         >
-          💡 <strong>Why together?</strong> Threefold Cord gives each of you a private space for honest reflection,
-          then brings your insights together on a shared dashboard. Your individual answers stay private.
+          Each of you reflects privately, then Cleave brings your insights together. Individual answers stay private until you both respond.
         </p>
       </div>
 
@@ -64,6 +78,19 @@ export function InviteSpouseStep({ data, setData, onSkip }: Props) {
             lineHeight: 1.6,
           }}
         />
+      </div>
+
+      {/* What they receive */}
+      <div
+        className="rounded-xl p-4 mb-4"
+        style={{ background: t.bgAccent, border: `1px solid ${t.border}50` }}
+      >
+        <p className="text-xs m-0 font-semibold mb-1" style={{ color: t.textSecondary, fontFamily: 'Source Sans 3, sans-serif' }}>
+          What they&apos;ll receive:
+        </p>
+        <p className="text-xs m-0" style={{ color: t.textMuted, fontFamily: 'Source Sans 3, sans-serif', lineHeight: 1.5 }}>
+          A warm, personal email from you with a link to create their free account. They&apos;ll be connected to your couple dashboard instantly.
+        </p>
       </div>
 
       <button

@@ -114,7 +114,7 @@ export function InstallPrompt() {
         </div>
         <div className="flex-1 min-w-0">
           <div className="text-sm font-semibold" style={{ color: 'var(--text-primary)', fontFamily: 'Source Sans 3, sans-serif' }}>
-            Install Threefold Cord
+            Install Cleave
           </div>
           <div className="text-xs" style={{ color: 'var(--text-muted)' }}>
             Quick access · Offline ready · Push notifications

@@ -4,14 +4,15 @@ import { ThemeProvider } from '@/lib/theme';
 import { BottomNav } from '@/components/ui/BottomNav';
 import { ServiceWorkerRegistrar } from '@/components/ServiceWorkerRegistrar';
 import { InstallPrompt } from '@/components/ui/InstallPrompt';
+import { OfflineDetector } from '@/components/ui/OfflineDetector';
 
 export const metadata: Metadata = {
-  title: 'Threefold Cord — Covenant-Strong Marriages',
+  title: 'Cleave — Covenant-Strong Marriages',
   description:
     'A faith-centred covenant movement equipping husbands and wives to grow, repair, and thrive together — for life.',
   keywords: ['marriage', 'covenant', 'faith', 'couples', 'church', 'relationship'],
   openGraph: {
-    title: 'Threefold Cord',
+    title: 'Cleave',
     description: 'A faith-centred covenant movement for real marriages.',
     type: 'website',
   },
@@ -43,7 +44,7 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/pwa/icon-192x192.png" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-        <meta name="apple-mobile-web-app-title" content="Threefold" />
+        <meta name="apple-mobile-web-app-title" content="Cleave" />
         {/* Prevent flash of wrong theme */}
         <script
           dangerouslySetInnerHTML={{
@@ -63,6 +64,7 @@ export default function RootLayout({
       <body className="min-h-screen antialiased" style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)' }}>
         <ThemeProvider>
           <ServiceWorkerRegistrar />
+          <OfflineDetector />
           {children}
           <BottomNav />
           <InstallPrompt />
