@@ -7,7 +7,8 @@ import Link from 'next/link';
 import { AdminCard } from '@/components/admin/AdminUI';
 import { DevotionalsTab } from '@/components/admin/DevotionalsTab';
 import { ResetTab } from '@/components/admin/ResetTab';
-import { AssessmentTab, ExercisesTab, GamesTab, ConflictTab, MilestonesTab, UsersTab, ChurchesTab } from '@/components/admin/ContentTabs';
+import { AssessmentTab, ExercisesTab, GamesTab, ConflictTab, MilestonesTab, ChurchesTab } from '@/components/admin/ContentTabs';
+import { UsersTab } from '@/components/admin/UsersTab';
 
 type Tab = 'overview' | 'devotionals' | 'reset' | 'assessment' | 'exercises' | 'games' | 'conflict' | 'milestones' | 'users' | 'churches';
 

@@ -425,58 +425,6 @@ export function MilestonesTab() {
 }
 
 // ═══════════════════════════════════════
-// USERS TAB
-// ═══════════════════════════════════════
-export function UsersTab() {
-  const [users, setUsers] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const supabase = useSupabase();
-
-  const load = useCallback(async () => {
-    const { data } = await supabase.rpc('admin_list_profiles');
-    if (data) setUsers(data);
-    setLoading(false);
-  }, []);
-  useEffect(() => { load(); }, [load]);
-
-  if (loading) return <div className="text-center py-20" style={{ color: '#8A9BAA' }}>Loading...</div>;
-
-  const ROLE_COLORS: Record<string, { bg: string; text: string }> = {
-    super_admin: { bg: '#FDF2F2', text: '#C44536' },
-    spouse: { bg: '#F0F7EC', text: '#5B8A3C' },
-    individual: { bg: '#E3F2FD', text: '#1565C0' },
-  };
-
-  return (
-    <>
-      <SectionHeader title="Users" count={users.length} />
-      <div className="space-y-2">
-        {users.map((u) => {
-          const rc = ROLE_COLORS[u.role] || ROLE_COLORS.individual;
-          return (
-            <AdminCard key={u.id} className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold" style={{ background: '#F5ECD7', color: '#B8860B' }}>
-                  {(u.first_name || u.email || '?')[0].toUpperCase()}
-                </div>
-                <div>
-                  <div className="text-sm font-semibold" style={{ color: '#0F1E2E' }}>{u.first_name ? u.first_name + ' ' + (u.last_name || '') : 'Not onboarded'}</div>
-                  <div className="text-xs" style={{ color: '#8A9BAA' }}>{u.email}</div>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: rc.bg, color: rc.text }}>{u.role}</span>
-                {u.onboarding_completed && <span className="text-xs" style={{ color: '#5B8A3C' }}>Onboarded</span>}
-              </div>
-            </AdminCard>
-          );
-        })}
-      </div>
-    </>
-  );
-}
-
-// ═══════════════════════════════════════
 // CHURCHES TAB
 // ═══════════════════════════════════════
 export function ChurchesTab() {
