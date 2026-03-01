@@ -145,7 +145,7 @@ export default function DashboardPage() {
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-1.5">
                 {(profile?.streak_count||0) > 0 && streakAlive ? (
-                  <Image src="/icons/icon-flame.png" alt="" width={20} height={20} />
+                  <Image src="/icons/icon-flame.png" alt="Streak" width={20} height={20} />
                 ) : ( <span className="text-base">💤</span> )}
                 <span className="text-xl font-bold" style={{ fontFamily:'Source Sans 3,sans-serif', color:(profile?.streak_count||0) > 0 && streakAlive ? t.textLink : t.textMuted }}>
                   {profile?.streak_count || 0}
@@ -172,7 +172,7 @@ export default function DashboardPage() {
             <div className="rounded-2xl p-5 mb-4 cursor-pointer transition-all hover:-translate-y-0.5" style={{ background:t.bgCard, boxShadow:t.shadowCard, border:`1.5px solid ${t.textLink}30` }}>
               <div className="flex items-start gap-4">
                 <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: todayDev ? PILLAR[todayDev.pillar]?.bg || t.goldBg : t.bgAccent }}>
-                  {todayDev && <Image src={PILLAR[todayDev.pillar]?.icon || '/icons/icon-book.png'} alt="" width={28} height={28} />}
+                  {todayDev && <Image src={PILLAR[todayDev.pillar]?.icon || '/icons/icon-book.png'} alt={todayDev.pillar} width={28} height={28} />}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color:t.textLink, fontFamily:'Source Sans 3,sans-serif' }}>

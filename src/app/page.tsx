@@ -169,7 +169,7 @@ export default function LandingPage() {
               <div key={i} className="text-center md:text-left">
                 <div className="flex items-center justify-center md:justify-start gap-4 mb-4">
                   <span className="text-3xl font-bold" style={{ fontFamily: 'Cormorant Garamond, serif', color: `${C.gold}40` }}>{step.num}</span>
-                  <Image src={step.icon} alt="" width={36} height={36} />
+                  <Image src={step.icon} alt={step.title} width={36} height={36} />
                 </div>
                 <h3 className="text-lg font-semibold mb-2" style={{ fontFamily: 'Source Sans 3, sans-serif', color: C.textDark }}>{step.title}</h3>
                 <p className="text-sm" style={{ fontFamily: 'DM Sans, sans-serif', color: C.textMid, lineHeight: 1.7 }}>{step.desc}</p>
@@ -198,7 +198,7 @@ export default function LandingPage() {
             {PILLARS.map((p, i) => (
               <div key={i} className="rounded-2xl p-6 md:p-8 transition-all hover:-translate-y-1" style={{ background: p.bg, border: `1px solid ${p.color}15` }}>
                 <div className="flex items-center gap-4 mb-3">
-                  <Image src={p.icon} alt="" width={36} height={36} />
+                  <Image src={p.icon} alt={p.label} width={36} height={36} />
                   <h3 className="text-lg font-semibold" style={{ fontFamily: 'Source Sans 3, sans-serif', color: p.color }}>{p.label}</h3>
                 </div>
                 <p className="text-sm" style={{ fontFamily: 'DM Sans, sans-serif', color: C.textMid, lineHeight: 1.7 }}>{p.desc}</p>
@@ -224,7 +224,7 @@ export default function LandingPage() {
             {FEATURES.map((f, i) => (
               <div key={i} className="rounded-2xl p-6 transition-all hover:-translate-y-1" style={{ background: C.white, boxShadow: '0 2px 16px rgba(44,36,24,0.04)', border: `1px solid ${C.ivoryDark}` }}>
                 <div className="flex items-center justify-between mb-4">
-                  <Image src={f.icon} alt="" width={32} height={32} />
+                  <Image src={f.icon} alt={f.title} width={32} height={32} />
                   {f.free === true ? (
                     <span className="text-[10px] font-semibold px-2.5 py-1 rounded-full uppercase tracking-wider" style={{ background: C.greenBg, color: C.green }}>Free</span>
                   ) : f.free === false ? (

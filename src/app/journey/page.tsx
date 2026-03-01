@@ -41,33 +41,38 @@ export default function JourneyPage() {
   useEffect(() => { if (!loading) setTimeout(() => setVisible(true), 100); }, [loading]);
 
   async function load() {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) { router.push('/auth'); return; }
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { router.push('/auth'); return; }
 
-    // Profile
-    const { data: prof } = await supabase.from('profiles').select('current_devotional_day,streak_count,longest_streak').eq('id',user.id).single();
+      // Profile
+      const { data: prof } = await supabase.from('profiles').select('current_devotional_day,streak_count,longest_streak').eq('id',user.id).single();
 
-    // Devotional completions count
-    const { count: devCount } = await supabase.from('devotional_completions').select('*',{count:'exact',head:true}).eq('profile_id',user.id);
+      // Devotional completions count
+      const { count: devCount } = await supabase.from('devotional_completions').select('*',{count:'exact',head:true}).eq('profile_id',user.id);
 
-    // Total devotionals
-    const { count: totalDays } = await supabase.from('devotionals').select('*',{count:'exact',head:true}).eq('is_active',true);
+      // Total devotionals
+      const { count: totalDays } = await supabase.from('devotionals').select('*',{count:'exact',head:true}).eq('is_active',true);
 
-    // Bible readings
-    const { data: br } = await supabase.from('bible_readings').select('book,chapter,verse_start,verse_end,scripture_reference,read_at').eq('profile_id',user.id).order('read_at',{ascending:true});
+      // Bible readings
+      const { data: br } = await supabase.from('bible_readings').select('book,chapter,verse_start,verse_end,scripture_reference,read_at').eq('profile_id',user.id).order('read_at',{ascending:true});
 
-    const uniqueBooks = new Set((br||[]).map(r => r.book));
+      const uniqueBooks = new Set((br||[]).map(r => r.book));
 
-    setReadings(br || []);
-    setStats({
-      devos_done: devCount || 0,
-      current_day: prof?.current_devotional_day || 1,
-      total_days: totalDays || 90,
-      streak: prof?.streak_count || 0,
-      longest_streak: Math.max(prof?.longest_streak || 0, prof?.streak_count || 0),
-      books_read: uniqueBooks.size,
-    });
-    setLoading(false);
+      setReadings(br || []);
+      setStats({
+        devos_done: devCount || 0,
+        current_day: prof?.current_devotional_day || 1,
+        total_days: totalDays || 90,
+        streak: prof?.streak_count || 0,
+        longest_streak: Math.max(prof?.longest_streak || 0, prof?.streak_count || 0),
+        books_read: uniqueBooks.size,
+      });
+    } catch (err) {
+      console.error('[Journey] Failed to load:', err);
+    } finally {
+      setLoading(false);
+    }
   }
 
   // Build sets for quick lookup

@@ -65,7 +65,7 @@ export function AssessmentIntro({ onStart }: Props) {
               transitionDelay: `${0.2 + i * 0.1}s`,
             }}
           >
-            <Image src={p.icon} alt="" width={32} height={32} className="flex-shrink-0" />
+            <Image src={p.icon} alt={p.label} width={32} height={32} className="flex-shrink-0" />
             <div>
               <div className="text-sm font-semibold" style={{ fontFamily: 'Source Sans 3, sans-serif', color: t.textPrimary }}>{p.label}</div>
               <div className="text-xs mt-0.5" style={{ fontFamily: 'Source Sans 3, sans-serif', color: t.textMuted }}>{p.desc}</div>

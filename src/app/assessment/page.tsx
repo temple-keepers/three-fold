@@ -66,21 +66,26 @@ export default function AssessmentPage() {
   // Load questions
   useEffect(() => {
     async function loadQuestions() {
-      const { data: questions } = await supabase
-        .from('assessment_questions')
-        .select('*')
-        .eq('is_active', true)
-        .order('question_order');
+      try {
+        const { data: questions } = await supabase
+          .from('assessment_questions')
+          .select('*')
+          .eq('is_active', true)
+          .order('question_order');
 
-      if (questions) {
-        const groups: PillarGroup[] = PILLAR_ORDER.map((pillar) => ({
-          pillar,
-          ...PILLAR_META[pillar],
-          questions: questions.filter((q) => q.pillar === pillar),
-        }));
-        setPillarGroups(groups);
+        if (questions) {
+          const groups: PillarGroup[] = PILLAR_ORDER.map((pillar) => ({
+            pillar,
+            ...PILLAR_META[pillar],
+            questions: questions.filter((q) => q.pillar === pillar),
+          }));
+          setPillarGroups(groups);
+        }
+      } catch (err) {
+        console.error('[Assessment] Failed to load questions:', err);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     }
     loadQuestions();
   }, []);

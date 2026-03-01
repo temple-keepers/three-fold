@@ -87,7 +87,7 @@ export function CovenantMomentStep({ data, onComplete, saving }: Props) {
               transitionDelay: `${0.3 + i * 0.15}s`,
             }}
           >
-            <Image src={item.icon} alt="" width={28} height={28} className="flex-shrink-0 mt-0.5" />
+            <Image src={item.icon} alt={item.title} width={28} height={28} className="flex-shrink-0 mt-0.5" />
             <div>
               <div
                 className="text-base font-semibold mb-0.5"

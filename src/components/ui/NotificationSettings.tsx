@@ -142,6 +142,9 @@ export function NotificationSettings() {
         <button
           onClick={handleTogglePush}
           disabled={!supported || permission === 'denied' || toggling}
+          role="switch"
+          aria-checked={subscribed}
+          aria-label="Toggle push notifications"
           className="relative w-12 h-7 rounded-full border-none cursor-pointer transition-all duration-200"
           style={{
             background: subscribed ? 'var(--gold, #C7A23A)' : 'var(--border)',
@@ -173,6 +176,9 @@ export function NotificationSettings() {
               </div>
               <button
                 onClick={() => updatePref(item.key, !prefs[item.key])}
+                role="switch"
+                aria-checked={!!prefs[item.key]}
+                aria-label={`Toggle ${item.label}`}
                 className="relative w-10 h-6 rounded-full border-none cursor-pointer transition-all duration-200"
                 style={{ background: prefs[item.key] ? 'var(--green, #5B8A3C)' : 'var(--border)' }}
               >

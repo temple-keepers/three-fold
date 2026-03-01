@@ -103,7 +103,7 @@ export function BottomNav() {
                 >
                   <Image
                     src={item.icon}
-                    alt=""
+                    alt={item.label}
                     width={22}
                     height={22}
                     style={{

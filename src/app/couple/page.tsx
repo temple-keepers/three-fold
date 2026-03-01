@@ -59,49 +59,53 @@ export default function CoupleDashboard() {
   }
 
   async function loadData() {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) { router.push('/auth'); return; }
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { router.push('/auth'); return; }
 
-    const { data: prof } = await supabase.from('profiles').select('*').eq('id', user.id).single();
-    if (prof) {
-      setProfile(prof);
+      const { data: prof } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+      if (prof) {
+        setProfile(prof);
 
-      if (prof.partner_id) {
-        const { data: part } = await supabase.from('profiles').select('*').eq('id', prof.partner_id).single();
-        if (part) setPartner(part);
+        if (prof.partner_id) {
+          const { data: part } = await supabase.from('profiles').select('*').eq('id', prof.partner_id).single();
+          if (part) setPartner(part);
+        }
+
+        if (prof.couple_id) {
+          const { data: coup } = await supabase.from('couples').select('*').eq('id', prof.couple_id).single();
+          if (coup) setCouple(coup);
+
+          const { data: comps } = await supabase.from('couple_exercise_completions')
+            .select('*').eq('couple_id', prof.couple_id).order('completed_at', { ascending: false }).limit(20);
+          if (comps) setCompletions(comps);
+
+          const monday = getMonday(new Date()).toISOString().split('T')[0];
+          const { data: ci } = await supabase.from('couple_check_ins')
+            .select('*').eq('couple_id', prof.couple_id).eq('week_of', monday).maybeSingle();
+          if (ci) setCheckIn(ci);
+
+          const { data: ln } = await supabase.from('love_notes')
+            .select('*').eq('couple_id', prof.couple_id).order('created_at', { ascending: false }).limit(20);
+          if (ln) setNotes(ln);
+
+          const { data: gl } = await supabase.from('couple_goals')
+            .select('*').eq('couple_id', prof.couple_id).eq('status', 'active').order('created_at', { ascending: false });
+          if (gl) setGoals(gl);
+
+          const { data: cs } = await supabase.from('couple_assessment_summaries')
+            .select('*').eq('couple_id', prof.couple_id).order('created_at', { ascending: false }).limit(1).maybeSingle();
+          if (cs) setCoupleSummary(cs);
+        }
       }
 
-      if (prof.couple_id) {
-        const { data: coup } = await supabase.from('couples').select('*').eq('id', prof.couple_id).single();
-        if (coup) setCouple(coup);
-
-        const { data: comps } = await supabase.from('couple_exercise_completions')
-          .select('*').eq('couple_id', prof.couple_id).order('completed_at', { ascending: false }).limit(20);
-        if (comps) setCompletions(comps);
-
-        const monday = getMonday(new Date()).toISOString().split('T')[0];
-        const { data: ci } = await supabase.from('couple_check_ins')
-          .select('*').eq('couple_id', prof.couple_id).eq('week_of', monday).maybeSingle();
-        if (ci) setCheckIn(ci);
-
-        const { data: ln } = await supabase.from('love_notes')
-          .select('*').eq('couple_id', prof.couple_id).order('created_at', { ascending: false }).limit(20);
-        if (ln) setNotes(ln);
-
-        const { data: gl } = await supabase.from('couple_goals')
-          .select('*').eq('couple_id', prof.couple_id).eq('status', 'active').order('created_at', { ascending: false });
-        if (gl) setGoals(gl);
-
-        const { data: cs } = await supabase.from('couple_assessment_summaries')
-          .select('*').eq('couple_id', prof.couple_id).order('created_at', { ascending: false }).limit(1).maybeSingle();
-        if (cs) setCoupleSummary(cs);
-      }
+      const { data: exs } = await supabase.from('couple_exercises').select('*').eq('is_active', true).order('display_order');
+      if (exs) setExercises(exs);
+    } catch (err) {
+      console.error('[Couple] Failed to load:', err);
+    } finally {
+      setLoading(false);
     }
-
-    const { data: exs } = await supabase.from('couple_exercises').select('*').eq('is_active', true).order('display_order');
-    if (exs) setExercises(exs);
-
-    setLoading(false);
   }
 
   async function submitCheckIn(ciRating: number, ciHighlight: string, ciNeed: string, ciGratitude: string) {

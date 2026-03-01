@@ -105,26 +105,30 @@ export default function GamesPage() {
   useEffect(() => { if (!loading) setTimeout(() => setVisible(true), 100); }, [loading]);
 
   async function loadGames() {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) { router.push('/auth'); return; }
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { router.push('/auth'); return; }
 
-    // Get couple_id
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('couple_id')
-      .eq('id', user.id)
-      .single();
-    if (profile?.couple_id) setCoupleId(profile.couple_id);
+      // Get couple_id
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('couple_id')
+        .eq('id', user.id)
+        .single();
+      if (profile?.couple_id) setCoupleId(profile.couple_id);
 
-    // Fetch active games
-    const { data } = await supabase
-      .from('marriage_games')
-      .select('*')
-      .eq('is_active', true)
-      .order('created_at');
-    if (data) setGames(data);
-
-    setLoading(false);
+      // Fetch active games
+      const { data } = await supabase
+        .from('marriage_games')
+        .select('*')
+        .eq('is_active', true)
+        .order('created_at');
+      if (data) setGames(data);
+    } catch (err) {
+      console.error('[Games] Failed to load:', err);
+    } finally {
+      setLoading(false);
+    }
   }
 
   /* ─── Timer logic ─── */
