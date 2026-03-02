@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { CleaveLogo } from '@/components/ui/Logo';
+import { AppDemo } from '@/components/landing/AppDemo';
 
 /* ═══════════════════════════════════════════════════════════════
    LANDING PAGE — Cleave
@@ -241,6 +242,9 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* ═══════════════════ APP DEMO ═══════════════════ */}
+      <AppDemo />
+
       {/* ═══════════════════ PRICING ═══════════════════ */}
       <section id="founding" className="py-20 md:py-28 px-6" style={{ background: C.white }}>
         <div className="max-w-5xl mx-auto">
@@ -391,7 +395,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ═══════════════════ SCRIPTURE + FUTURE TESTIMONIALS ═══════════════════ */}
+      {/* ═══════════════════ SCRIPTURE ═══════════════════ */}
       <section className="py-20 md:py-28 px-6" style={{ background: C.ivory }}>
         <div className="max-w-3xl mx-auto text-center">
           <div className="w-16 h-px mx-auto mb-8" style={{ background: C.gold, opacity: 0.3 }} />
@@ -401,31 +405,7 @@ export default function LandingPage() {
           <p className="text-sm font-semibold uppercase tracking-widest" style={{ color: C.gold, fontFamily: 'Source Sans 3, sans-serif', letterSpacing: '0.15em' }}>
             Ecclesiastes 4:12
           </p>
-          <div className="w-16 h-px mx-auto mt-8 mb-12" style={{ background: C.gold, opacity: 0.3 }} />
-
-          {/* Early adopter quotes */}
-          <div className="grid md:grid-cols-3 gap-6 text-left">
-            {[
-              { quote: 'The daily devotional genuinely changed how we start our mornings. We pray together now — something we never did before.', name: 'Early Adopter Couple', location: 'London' },
-              { quote: 'We were stuck in the same arguments for years. The repair tools gave us a real framework to break the cycle.', name: 'Beta Tester', location: 'Manchester' },
-              { quote: 'As a pastor, I recommend Cleave to every couple in our pre-marriage course. It bridges the gap between Sunday and Monday.', name: 'Church Partner', location: 'Birmingham' },
-            ].map((t, i) => (
-              <div key={i} className="rounded-2xl p-6" style={{ background: C.white, boxShadow: '0 2px 12px rgba(0,0,0,0.04)' }}>
-                <p className="text-sm italic m-0 mb-4" style={{ color: C.textDark, fontFamily: 'Cormorant Garamond, serif', lineHeight: 1.7, fontSize: '15px' }}>
-                  &ldquo;{t.quote}&rdquo;
-                </p>
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold" style={{ background: C.goldSoft, color: C.goldDark }}>
-                    {t.name[0]}
-                  </div>
-                  <div>
-                    <p className="text-xs font-semibold m-0" style={{ color: C.textDark, fontFamily: 'Source Sans 3, sans-serif' }}>{t.name}</p>
-                    <p className="text-xs m-0" style={{ color: C.textMid }}>{t.location}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+          <div className="w-16 h-px mx-auto mt-8" style={{ background: C.gold, opacity: 0.3 }} />
         </div>
       </section>
 
